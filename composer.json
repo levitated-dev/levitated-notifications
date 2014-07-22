@@ -1,0 +1,21 @@
+{
+    "name": "levitated/notifications",
+    "description": "Email/SMS notifications",
+    "authors": [
+        {
+            "name": "Levitated",
+            "email": "jan@levitated.pl"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "illuminate/support": "4.1.*",
+        "travisjryan/twilio": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {
+            "Levitated\\Notifications": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}

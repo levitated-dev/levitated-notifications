@@ -28,20 +28,20 @@ class NotificationQueue extends Model {
      * @param array  $params
      * @throws MissingParamException
      */
-    public static function queueEmail($to, $viewName = 'notifications/default.twig', $data, $params = [])
-    {
+    public static function queueEmail($to, $viewName = 'notifications/default.twig', $data, $params = []) {
         if (empty($to)) {
             throw new MissingParamException("Could not send Email - missing `to` field.");
         }
 
+        $htmlTemplate = getVal($params, 'emailTemplate', 'notifications/layouts/html.twig');
+
         $queuedNotification = new self();
         $queuedNotification->type = self::TYPE_EMAIL;
         $queuedNotification->to = $to;
-        $template = \Twig::loadTemplate($viewName);
-        $queuedNotification->bodyHtml = $template->renderBlock('html', $data);
-        $queuedNotification->subject = $template->renderBlock('subject', $data);
-        $queuedNotification->bodyPlain = $template->renderBlock('plain', $data);
-        $queuedNotification->fromName = Config::get('notifications::emailFromName');
+        $queuedNotification->fromName = Config::get('notifications::emailFrom');
+        $queuedNotification->subject = \Twig::render($viewName, $data + array('emailTemplate' => 'notifications/layouts/subject.twig'));
+        $queuedNotification->bodyHtml = \Twig::render($viewName, $data + array('emailTemplate' => $htmlTemplate));
+        $queuedNotification->bodyPlain = \Twig::render($viewName, $data + array('emailTemplate' => 'notifications/layouts/plain.twig'));
         self::setNotificationParams($queuedNotification, $params);
         $queuedNotification->save();
     }
@@ -101,20 +101,35 @@ class NotificationQueue extends Model {
                 }
 
                 if (!Config::get('notifications::simulateSending')) {
-                    Mail::send(
-                        [
-                            'text' => 'notifications/layouts/email/plain',
-                            'html' => 'notifications/layouts/email/html'
-                        ],
-                        [
-                            'html' => $queuedEmail->bodyHtml,
-                            'plain' => $queuedEmail->bodyPlain
-                        ],
-                        function ($message) use ($queuedEmail) {
-                            $message->to($queuedEmail->to);
-                            $message->subject($queuedEmail->subject);
-                        }
+                    $ses = \App::make('aws')->get('ses');
+                    $email = array(
+                        'Source'      => $queuedEmail->fromName,
+                        'Destination' => array(
+                            'ToAddresses' => [$queuedEmail->to],
+                        ),
+                        'Message'     => array(
+                            'Subject' => array(
+                                'Data'    => $queuedEmail->subject,
+                                'Charset' => 'utf8',
+                            ),
+                            'Body'    => array(
+                                'Text' => array(
+                                    'Data'    => $queuedEmail->bodyPlain,
+                                    'Charset' => 'utf8',
+                                ),
+                                'Html' => array(
+                                    'Data'    => $queuedEmail->bodyHtml,
+                                    'Charset' => 'utf8',
+                                ),
+                            ),
+                        ),
+                        'ReturnPath'  => Config::get('notifications::emailReturnPath'),
                     );
+                    if ($queuedEmail->replyTo) {
+                        $email['ReplyToAddresses'] = $queuedEmail->replyTo;
+                    }
+
+                    $ses->sendEmail($email);
                 }
 
                 $queuedEmail->state = 'sent';

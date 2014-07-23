@@ -33,15 +33,15 @@ class NotificationQueue extends Model {
             throw new MissingParamException("Could not send Email - missing `to` field.");
         }
 
-        $htmlTemplate = getVal($params, 'emailTemplate', 'notifications/layouts/html.twig');
+        $htmlTemplate = getVal($params, 'emailTemplate', 'notifications::notifications/layouts/html.twig');
 
         $queuedNotification = new self();
         $queuedNotification->type = self::TYPE_EMAIL;
         $queuedNotification->to = $to;
         $queuedNotification->fromName = Config::get('notifications::emailFrom');
-        $queuedNotification->subject = \Twig::render($viewName, $data + array('emailTemplate' => 'notifications/layouts/subject.twig'));
+        $queuedNotification->subject = \Twig::render($viewName, $data + array('emailTemplate' => 'notifications::notifications/layouts/subject.twig'));
         $queuedNotification->bodyHtml = \Twig::render($viewName, $data + array('emailTemplate' => $htmlTemplate));
-        $queuedNotification->bodyPlain = \Twig::render($viewName, $data + array('emailTemplate' => 'notifications/layouts/plain.twig'));
+        $queuedNotification->bodyPlain = \Twig::render($viewName, $data + array('emailTemplate' => 'notifications::notifications/layouts/plain.twig'));
         self::setNotificationParams($queuedNotification, $params);
         $queuedNotification->save();
     }

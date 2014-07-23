@@ -12,7 +12,7 @@ class NotificationQueue extends Migration {
 	 */
 	public function up()
 	{
-        Schema::create('notifications', function(Blueprint $table)
+        Schema::create('notificationQueue', function(Blueprint $table)
         {
             $table->increments('id');
             $table->string('subject', 512);
@@ -30,8 +30,8 @@ class NotificationQueue extends Migration {
             $table->longText('bodyHtml');
             $table->longText('bodyPlain');
             $table->enum('type', array('email', 'sms'))->default('email');
-            $table->enum('relatedObjectType', array('unknown'))->default('email');
-            $table->integer('relatedObjectId');
+            $table->enum('relatedObjectType', array('unknown'))->default('unknown');
+            $table->integer('relatedObjectId')->nullable();
         });
 	}
 

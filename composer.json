@@ -10,12 +10,18 @@
     "require": {
         "php": ">=5.3.0",
         "illuminate/support": "4.1.*",
-        "travisjryan/twilio": "dev-master"
+        "aws/aws-sdk-php-laravel": "1.*",
+        "travisjryan/twilio": "~1.0.1",
+        "barryvdh/laravel-twigbridge": "dev-master",
+        "erusev/parsedown": "dev-master"
     },
     "autoload": {
         "psr-0": {
             "Levitated\\Notifications": "src/"
         }
+    },
+    "config": {
+        "preferred-install": "dist"
     },
     "minimum-stability": "dev"
 }

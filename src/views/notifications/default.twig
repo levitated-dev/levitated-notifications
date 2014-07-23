@@ -1,0 +1,18 @@
+{% extends emailTemplate %}
+
+{% block subject %}{{ subject|default('A message to you') }}{% endblock %}
+
+{% block html %}
+    <h3>Message:</h3>
+    {{ content|default('') }}
+{% endblock %}
+
+{% block plain %}
+    Message:
+    {{ content|default('') }}
+{% endblock %}
+
+{% block sms %}
+    Message:
+    {{ content|default('') }}
+{% endblock %}

@@ -27,6 +27,15 @@ class NotificationsServiceProvider extends ServiceProvider
             return new NotificationsDaemonCommand;
         });
         $this->commands('command.levitated-notifications-daemon');
+
+        $this->app->register('Aws\Laravel\AwsServiceProvider');
+        $this->app->register('Barryvdh\TwigBridge\ServiceProvider');
+        $this->app->register('Travisjryan\Twilio\TwilioServiceProvider');
+
+        $loader = \Illuminate\Foundation\AliasLoader::getInstance();
+        $loader->alias('Twig', 'Barryvdh\TwigBridge\Twig');
+        $loader->alias('Twilio', 'Travisjryan\Twilio\Facades\Twilio');
+        $loader->alias('AWS', 'Aws\Laravel\AwsFacade');
     }
 
     /**

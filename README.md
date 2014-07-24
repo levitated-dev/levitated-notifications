@@ -69,7 +69,11 @@ Run ```composer update```
 
 Then run the migration:
 
-php artisan migrate --package=levitated/notifications
+```php artisan migrate --package=levitated/notifications```
+
+Publish the config:
+
+```php artisan config:publish levitated/notifications```
 
 And you're ready to start using the notifications:
 

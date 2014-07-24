@@ -177,7 +177,7 @@ class NotificationQueue extends Model {
                 }
 
                 if (!Config::get('notifications::simulateSending')) {
-                    Twilio::message($queuedSms->to, $queuedSms->bodyPlain);
+                    \Twilio::message($queuedSms->to, $queuedSms->bodyPlain);
                 }
 
                 $queuedSms->state = 'sent';

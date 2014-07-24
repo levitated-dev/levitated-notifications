@@ -23,5 +23,6 @@ return [
 
     'daemonIterations' => 500,
     'maxSentEmailsPerSecond' => 1,
+    'maxSentSmsesPerSecond' => 1,
     'daemonSleepAfterError' => 1,
 ];

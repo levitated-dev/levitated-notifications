@@ -15,13 +15,21 @@ class NotificationQueue extends Model {
 
     protected $table = 'notificationQueue';
 
-    protected static function setNotificationParams($queuedNotification, $params) {
+    /**
+     * Set optional parameters of the notification from an array.
+     *
+     * @param NotificationQueue $queuedNotification
+     * @param array $params
+     */
+    protected static function setNotificationParams(NotificationQueue $queuedNotification, $params) {
         $queuedNotification->relatedObjectType = getVal('relatedObjectType', $params);
         $queuedNotification->relatedObjectId = getVal('relatedObjectId', $params);
         $queuedNotification->toBeSentAt = getVal('toBeSentAt', $params);
     }
 
     /**
+     * Add an email to the queue.
+     *
      * @param string $to
      * @param string $viewName
      * @param array  $data
@@ -47,6 +55,8 @@ class NotificationQueue extends Model {
     }
 
     /**
+     * Add a text message to the queue.
+     *
      * @param string $to
      * @param string $viewName
      * @param array  $data
@@ -68,6 +78,8 @@ class NotificationQueue extends Model {
     }
 
     /**
+     * Send out emails.
+     *
      * @param int $amount
      * @throws \Exception
      */
@@ -147,11 +159,18 @@ class NotificationQueue extends Model {
         }
     }
 
+    /**
+     * Determine if notifications will be sent only to white-listed addresses.
+     *
+     * @return mixed
+     */
     public static function sendOnlyToWhitelist() {
         return Config::get('notifications::sendOnlyToWhitelist');
     }
 
     /**
+     * Send out text messages.
+     *
      * @param int $amount
      * @throws \Exception
      */
@@ -195,6 +214,12 @@ class NotificationQueue extends Model {
         }
     }
 
+    /**
+     * Process a notification that failed to send.
+     *
+     * @param NotificationQueue $queuedNotification
+     * @param \Exception        $e
+     */
     protected static function processFailedNotification(NotificationQueue $queuedNotification, \Exception $e) {
         $queuedNotification->tryNo++;
         echo "Failed (#{$queuedNotification->tryNo}): " . $e->getMessage() . PHP_EOL;
@@ -211,28 +236,14 @@ class NotificationQueue extends Model {
         $queuedNotification->save();
     }
 
+    /**
+     * Get name of notification type.
+     *
+     * @param $type
+     * @return mixed
+     */
     protected static function getTypeName($type) {
         $names = [self::TYPE_EMAIL => 'Email', self::TYPE_SMS => 'SMS'];
-
         return getVal($type, $names, 'unknown');
-    }
-
-    protected static function generateEvents($queuedNotification) {
-        try {
-            $relatedObjectType = $queuedNotification['relatedObjectType'];
-            switch ($relatedObjectType) {
-                case 'case':
-                    $type = self::getTypeName($queuedNotification['type']);
-                    $case = LessonCase::findOrFail($queuedNotification['relatedObjectId']);
-                    $caseEvent = new LessonCaseEvent();
-                    $caseEvent->lessonCaseId = $case->id;
-                    $caseEvent->type = LessonCaseEvent::EMAIL_NOTIFICATION_SENT;
-                    $caseEvent->data = $type . ' sent [' . $queuedNotification['to'] . ']: ' . $queuedNotification['bodyPlain'];
-                    $caseEvent->save();
-                    break;
-            }
-        } catch (\Exception $e) {
-            echo 'sent, the following error happened after: ' . $e->getMessage() . PHP_EOL;
-        }
     }
 }

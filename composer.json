@@ -11,7 +11,7 @@
         "php": ">=5.3.0",
         "illuminate/support": "4.1.*",
         "aws/aws-sdk-php-laravel": "1.*",
-        "travisjryan/twilio": "~1.0.1",
+        "travisjryan/twilio": "dev-master#b91601e",
         "barryvdh/laravel-twigbridge": "dev-master",
         "erusev/parsedown": "dev-master"
     },

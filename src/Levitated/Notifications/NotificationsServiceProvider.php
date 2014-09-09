@@ -30,11 +30,11 @@ class NotificationsServiceProvider extends ServiceProvider
 
         $this->app->register('Aws\Laravel\AwsServiceProvider');
         $this->app->register('Barryvdh\TwigBridge\ServiceProvider');
-        $this->app->register('Travisjryan\Twilio\TwilioServiceProvider');
+        $this->app->register('Aloha\Twilio\TwilioServiceProvider');
 
         $loader = \Illuminate\Foundation\AliasLoader::getInstance();
         $loader->alias('Twig', 'Barryvdh\TwigBridge\Twig');
-        $loader->alias('Twilio', 'Travisjryan\Twilio\Facades\Twilio');
+        $loader->alias('Twilio', 'Aloha\Twilio\Facades\Twilio');
         $loader->alias('AWS', 'Aws\Laravel\AwsFacade');
     }
 

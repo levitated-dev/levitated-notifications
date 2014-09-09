@@ -12,8 +12,8 @@
         "illuminate/support": "4.1.*",
         "aws/aws-sdk-php-laravel": "1.*",
         "aloha/twilio": "1.0.*",
-        "barryvdh/laravel-twigbridge": "dev-master",
-        "erusev/parsedown": "dev-master"
+        "barryvdh/laravel-twigbridge": "*",
+        "erusev/parsedown": "*"
     },
     "autoload": {
         "psr-0": {

@@ -77,7 +77,7 @@ class Notification implements NotificationInterface {
             );
 
             foreach ($recipients['emails'] as $email) {
-                $queue->queueEmail($email, $renderedNotification, $params);
+                $this->queue->queueEmail($email, $renderedNotification, $params);
             }
         }
 
@@ -99,7 +99,7 @@ class Notification implements NotificationInterface {
             );
 
             foreach ($recipients['phones'] as $phone) {
-                $queue->queueSms($phone, $renderedNotification, $params);
+                $this->queue->queueSms($phone, $renderedNotification, $params);
             }
         }
     }

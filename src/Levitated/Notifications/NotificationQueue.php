@@ -36,7 +36,7 @@ class NotificationQueue extends Model implements NotificationQueueInterface {
      * @param array  $params
      * @throws MissingParamException
      */
-    public static function queueEmail($to, $renderedNotification, $params = []) {
+    public function queueEmail($to, $renderedNotification, $params = []) {
         if (empty($to)) {
             throw new MissingParamException("Could not send Email - missing `to` field.");
         }
@@ -60,7 +60,7 @@ class NotificationQueue extends Model implements NotificationQueueInterface {
      * @param array  $params
      * @throws MissingParamException
      */
-    public static function queueSms($to, $renderedNotification, $params = []) {
+    public function queueSms($to, $renderedNotification, $params = []) {
         if (empty($to)) {
             throw new MissingParamException("Could not send SMS.");
         }

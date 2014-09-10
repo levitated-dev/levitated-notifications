@@ -1,9 +1,13 @@
 <?php namespace Levitated\Notifications;
 
 class TestCase extends \PHPUnit_Framework_TestCase {
-    public function getMockRenderer() {
+    protected function getMockRenderer() {
         return $this->getMockBuilder('Levitated\Notifications\NotificationRendererInterface')
-            ->setMethods(['render'])
+            ->getMock();
+    }
+
+    protected function getMockQueue() {
+        return $this->GetMockBuilder('Levitated\Notifications\NotificationQueueInterface')
             ->getMock();
     }
 }

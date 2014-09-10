@@ -1,7 +1,6 @@
 <?php namespace Levitated\Notifications;
 
-class Notification implements NotificationInterface
-{
+class Notification implements NotificationInterface {
     protected $viewData;
     protected $channels = [];
     protected $recipients;
@@ -13,16 +12,16 @@ class Notification implements NotificationInterface
 
     protected $smsViewName;
     protected $data;
+    protected $renderer;
 
-    public function __construct($recipients, $viewName, $viewData)
-    {
+    public function __construct($recipients, $viewName, $viewData, NotificationRendererInterface $renderer) {
         $this->setRecipients($recipients);
         $this->setViewData($viewData);
         $this->setViewName($viewName);
+        $this->renderer = $renderer;
     }
 
-    public function setChannelsAuto()
-    {
+    public function setChannelsAuto() {
         $recipients = $this->getRecipients();
         $channels = [];
         if (!empty($recipients['emails'])) {
@@ -39,8 +38,7 @@ class Notification implements NotificationInterface
      * @throws PhoneNumberNotSetException
      * @throws EmailNotSetException
      */
-    public function send()
-    {
+    public function send() {
         if ($this->getChannels() === []) {
             $this->setChannelsAuto();
         }
@@ -53,8 +51,8 @@ class Notification implements NotificationInterface
 
         $params = [
             'relatedObjectType' => $this->relatedObjectType,
-            'relatedObjectId' => $this->relatedObjectId,
-            'toBeSentAt' => $this->toBeSentAt
+            'relatedObjectId'   => $this->relatedObjectId,
+            'toBeSentAt'        => $this->toBeSentAt
         ];
 
         // send emails to queue
@@ -67,8 +65,15 @@ class Notification implements NotificationInterface
                 $recipients['emails'] = [$recipients['emails']];
             }
 
+            $renderedNotification = $this->renderer->render(
+                NotificationRendererInterface::EMAIL,
+                $viewName,
+                $viewData,
+                $params
+            );
+
             foreach ($recipients['emails'] as $email) {
-                $queue->queueEmail($email, $viewName, $viewData, $params);
+                $queue->queueEmail($email, $renderedNotification, $params);
             }
         }
 
@@ -82,79 +87,74 @@ class Notification implements NotificationInterface
                 $recipients['phones'] = [$recipients['phones']];
             }
 
+            $renderedNotification = $this->renderer->render(
+                NotificationRendererInterface::SMS,
+                $viewName,
+                $viewData,
+                $params
+            );
+
             foreach ($recipients['phones'] as $phone) {
-                $queue->queueSms($phone, $viewName, $viewData, $params);
+                $queue->queueSms($phone, $renderedNotification, $params);
             }
         }
     }
 
-    public function setSendTime($time)
-    {
+    public function setSendTime($time) {
         $this->toBeSentAt = $time;
     }
 
-    public function setRelatedObjectType($objectType)
-    {
+    public function setRelatedObjectType($objectType) {
         $this->relatedObjectType = $objectType;
     }
 
-    public function getRelatedObjectType()
-    {
+    public function getRelatedObjectType() {
         return $this->relatedObjectType;
     }
 
-    public function setRelatedObjectId($objectId)
-    {
+    public function setRelatedObjectId($objectId) {
         $this->relatedObjectId = $objectId;
     }
 
-    public function getRelatedObjectId()
-    {
+    public function getRelatedObjectId() {
         return $this->relatedObjectId;
     }
 
-    public function setViewData($viewData)
-    {
+    public function setViewData($viewData) {
         $this->viewData = $viewData;
     }
 
-    public function getViewData()
-    {
+    public function getViewData() {
         return $this->viewData;
     }
 
-    public function setViewName($emailViewName)
-    {
+    public function setViewName($emailViewName) {
         $this->emailViewName = $emailViewName;
     }
 
-    public function getViewName()
-    {
+    public function getViewName() {
         return $this->emailViewName;
     }
 
-    public function setSmsViewName($smsViewName)
-    {
+    public function setSmsViewName($smsViewName) {
         $this->smsViewName = $smsViewName;
     }
 
-    public function getSmsViewName()
-    {
+    public function getSmsViewName() {
         return $this->smsViewName;
     }
 
-    public function setRecipients($recipients)
-    {
+    public function setRecipients($recipients) {
         $this->recipients = [];
 
-        if (!empty($recipients['emails']) && !isObjectEmpty($recipients['emails'])) {
+        if (!empty($recipients['emails']) && !\LH::isObjectEmpty($recipients['emails'])) {
             if (is_string($recipients['emails'])) {
                 $recipients['emails'] = explode(',', $recipients['emails']);
             }
             $this->recipients['emails'] = $recipients['emails'];
         }
 
-        if (!empty($recipients['phones']) && !isObjectEmpty($recipients['phones'])) {
+        if (!empty($recipients['phones']) && !\LH::isObjectEmpty($recipients['phones'])) {
             if (is_string($recipients['phones'])) {
                 $recipients['phones'] = explode(',', $recipients['phones']);
             }
@@ -166,18 +166,15 @@ class Notification implements NotificationInterface
     /**
      * @return array
      */
-    public function getRecipients()
-    {
+    public function getRecipients() {
         return $this->recipients;
     }
 
-    public function setChannels(array $channels)
-    {
+    public function setChannels(array $channels) {
         $this->channels = $channels;
     }
 
-    public function getChannels()
-    {
+    public function getChannels() {
         return $this->channels;
     }
 }

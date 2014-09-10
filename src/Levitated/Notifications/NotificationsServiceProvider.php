@@ -33,9 +33,19 @@ class NotificationsServiceProvider extends ServiceProvider
         $this->app->register('Aloha\Twilio\TwilioServiceProvider');
 
         $loader = \Illuminate\Foundation\AliasLoader::getInstance();
+        $loader->alias('LH', 'Levitated\Helpers\LH');
         $loader->alias('Twig', 'Barryvdh\TwigBridge\Twig');
         $loader->alias('Twilio', 'Aloha\Twilio\Facades\Twilio');
         $loader->alias('AWS', 'Aws\Laravel\AwsFacade');
+
+        $this->app->bind('NotificationRenderer', function($app) {
+            $rendererClassName = \Config::get('notifications::rendererClassName');
+            if (!class_exists($rendererClassName)) {
+                // probable cause: the renderer package is not installed/configured correctly
+                throw new \Exception("Class $rendererClassName doesn't exist.");
+            }
+            return new $rendererClassName;
+        });
     }
 
     /**

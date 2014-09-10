@@ -22,34 +22,31 @@ class NotificationQueue extends Model {
      * @param array $params
      */
     protected static function setNotificationParams(NotificationQueue $queuedNotification, $params) {
-        $queuedNotification->relatedObjectType = getVal('relatedObjectType', $params);
-        $queuedNotification->relatedObjectId = getVal('relatedObjectId', $params);
-        $queuedNotification->toBeSentAt = getVal('toBeSentAt', $params);
+        $queuedNotification->relatedObjectType = \LH::getVal('relatedObjectType', $params);
+        $queuedNotification->relatedObjectId = \LH::getVal('relatedObjectId', $params);
+        $queuedNotification->toBeSentAt = \LH::getVal('toBeSentAt', $params);
     }
 
     /**
      * Add an email to the queue.
      *
      * @param string $to
-     * @param string $viewName
-     * @param array  $data
+     * @param array $renderedNotification
      * @param array  $params
      * @throws MissingParamException
      */
-    public static function queueEmail($to, $viewName = 'notifications/default.twig', $data, $params = []) {
+    public static function queueEmail($to, $renderedNotification, $params = []) {
         if (empty($to)) {
             throw new MissingParamException("Could not send Email - missing `to` field.");
         }
-
-        $htmlTemplate = getVal($params, 'emailTemplate', 'notifications::notifications/layouts/html.twig');
 
         $queuedNotification = new self();
         $queuedNotification->type = self::TYPE_EMAIL;
         $queuedNotification->to = $to;
         $queuedNotification->fromName = Config::get('notifications::emailFrom');
-        $queuedNotification->subject = \Twig::render($viewName, $data + array('emailTemplate' => 'notifications::notifications/layouts/subject.twig'));
-        $queuedNotification->bodyHtml = \Twig::render($viewName, $data + array('emailTemplate' => $htmlTemplate));
-        $queuedNotification->bodyPlain = \Twig::render($viewName, $data + array('emailTemplate' => 'notifications::notifications/layouts/plain.twig'));
+        $queuedNotification->subject = $renderedNotification['subject'];
+        $queuedNotification->bodyHtml = $renderedNotification['bodyHtml'];
+        $queuedNotification->bodyPlain = $renderedNotification['bodyPlain'];
         self::setNotificationParams($queuedNotification, $params);
         $queuedNotification->save();
     }
@@ -57,22 +54,20 @@ class NotificationQueue extends Model {
     /**
      * Add a text message to the queue.
      *
-     * @param string $to
-     * @param string $viewName
-     * @param array  $data
-     * @param array  $params
+     * @param string      $to
+     * @param array      $renderedNotification
+     * @param array $params
      * @throws MissingParamException
      */
-    public static function queueSms($to, $viewName, $data, $params = []) {
+    public static function queueSms($to, $renderedNotification, $params = []) {
         if (empty($to)) {
             throw new MissingParamException("Could not send SMS.");
         }
 
-        $smsTemplate = \Twig::loadTemplate($viewName);
         $queuedNotification = new self();
         $queuedNotification->type = self::TYPE_SMS;
         $queuedNotification->to = $to;
-        $queuedNotification->bodyPlain = $smsTemplate->renderBlock('sms', $data);
+        $queuedNotification->bodyPlain = $renderedNotification['bodyPlain'];
         self::setNotificationParams($queuedNotification, $params);
         $queuedNotification->save();
     }
@@ -226,7 +221,7 @@ class NotificationQueue extends Model {
         $maxTries = Config::get('notifications::maxTriesNum');
         if ($queuedNotification->tryNo < $maxTries) {
             $retryTimes = Config::get('notifications::retryIn');
-            $retryIn = getVal($queuedNotification->tryNo - 1, $retryTimes, array_slice($retryTimes, -1)[0]);
+            $retryIn = \LH::getVal($queuedNotification->tryNo - 1, $retryTimes, array_slice($retryTimes, -1)[0]);
             $queuedNotification->nextRetryAt = date(DB_DATE_FORMAT, strtotime($retryIn));
             echo "Will retry in {$retryIn}" . PHP_EOL;
         } else {
@@ -244,6 +239,6 @@ class NotificationQueue extends Model {
      */
     protected static function getTypeName($type) {
         $names = [self::TYPE_EMAIL => 'Email', self::TYPE_SMS => 'SMS'];
-        return getVal($type, $names, 'unknown');
+        return \LH::getVal($type, $names, 'unknown');
     }
 }

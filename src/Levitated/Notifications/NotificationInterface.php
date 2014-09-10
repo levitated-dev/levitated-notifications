@@ -1,17 +1,17 @@
 <?php namespace Levitated\Notifications;
 
-interface NotificationInterface
-{
+interface NotificationInterface {
     const CHANNEL_EMAIL = 'email';
     const CHANNEL_SMS = 'sms';
 
     /**
-     * @param array $recipients e.g. array('emails' => array('email1@example.com', 'email2@example.com'),
-     *                          'phones' => array('123 456 789')).
-     * @param string $viewName Name of view for this notification.
-     * @param array  $viewData Data passed to the view.
+     * @param array  $recipients                   e.g. array('emails' => array('email1@example.com', 'email2@example.com'),
+     *                                             'phones' => array('123 456 789')).
+     * @param string $viewName                     Name of view for this notification.
+     * @param array  $viewData                     Data passed to the view.
+     * @param        NotificationRendererInterface Renderer to be used.
      */
-    public function __construct($recipients, $viewName, $viewData);
+    public function __construct($recipients, $viewName, $viewData, NotificationRendererInterface $renderer);
 
     /**
      * @return array
@@ -78,10 +78,8 @@ interface NotificationInterface
     public function getViewData();
 }
 
-class EmailNotSetException extends \Exception
-{
+class EmailNotSetException extends \Exception {
 }
 
-class PhoneNumberNotSetException extends \Exception
-{
+class PhoneNumberNotSetException extends \Exception {
 }

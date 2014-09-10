@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'rendererClassName' => 'Levitated\Notifications\TwigNotificationRenderer',
+
     // fill with a verified SES sender
     'emailFrom' => 'name <email>',
 

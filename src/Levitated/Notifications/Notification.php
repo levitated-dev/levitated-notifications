@@ -1,24 +1,30 @@
 <?php namespace Levitated\Notifications;
 
+use Levitated\Helpers\LH;
+
 class Notification implements NotificationInterface {
+    protected $renderer;
+    protected $queue;
+
     protected $viewData;
     protected $channels = [];
     protected $recipients;
 
     protected $emailViewName;
+    protected $smsViewName;
+
     protected $relatedObjectType = 'unknown';
     protected $relatedObjectId;
     protected $toBeSentAt;
 
-    protected $smsViewName;
     protected $data;
-    protected $renderer;
 
-    public function __construct($recipients, $viewName, $viewData, NotificationRendererInterface $renderer) {
+    public function __construct($recipients, $viewName, $viewData, NotificationRendererInterface $renderer, NotificationQueueInterface $queue) {
         $this->setRecipients($recipients);
         $this->setViewData($viewData);
         $this->setViewName($viewName);
         $this->renderer = $renderer;
+        $this->queue = $queue;
     }
 
     public function setChannelsAuto() {
@@ -42,8 +48,6 @@ class Notification implements NotificationInterface {
         if ($this->getChannels() === []) {
             $this->setChannelsAuto();
         }
-
-        $queue = new NotificationQueue();
 
         $viewName = $this->getViewName();
         $viewData = $this->getViewData();
@@ -147,14 +151,14 @@ class Notification implements NotificationInterface {
     public function setRecipients($recipients) {
         $this->recipients = [];
 
-        if (!empty($recipients['emails']) && !\LH::isObjectEmpty($recipients['emails'])) {
+        if (!empty($recipients['emails']) && !LH::isObjectEmpty($recipients['emails'])) {
             if (is_string($recipients['emails'])) {
                 $recipients['emails'] = explode(',', $recipients['emails']);
             }
             $this->recipients['emails'] = $recipients['emails'];
         }
 
-        if (!empty($recipients['phones']) && !\LH::isObjectEmpty($recipients['phones'])) {
+        if (!empty($recipients['phones']) && !LH::isObjectEmpty($recipients['phones'])) {
             if (is_string($recipients['phones'])) {
                 $recipients['phones'] = explode(',', $recipients['phones']);
             }

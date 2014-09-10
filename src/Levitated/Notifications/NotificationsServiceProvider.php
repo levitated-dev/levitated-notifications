@@ -28,6 +28,7 @@ class NotificationsServiceProvider extends ServiceProvider
         });
         $this->commands('command.levitated-notifications-daemon');
 
+        $this->app->register('Levitated\HelpersServiceProvider');
         $this->app->register('Aws\Laravel\AwsServiceProvider');
         $this->app->register('Barryvdh\TwigBridge\ServiceProvider');
         $this->app->register('Aloha\Twilio\TwilioServiceProvider');

@@ -4,8 +4,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Levitated\Helpers\LH;
 
-class NotificationQueue extends Model {
+class NotificationQueue extends Model implements NotificationQueueInterface {
     const CREATED_AT = 'createdAt';
     const UPDATED_AT = 'updatedAt';
     const DELETED_AT = 'deletedAt';
@@ -19,19 +20,19 @@ class NotificationQueue extends Model {
      * Set optional parameters of the notification from an array.
      *
      * @param NotificationQueue $queuedNotification
-     * @param array $params
+     * @param array             $params
      */
     protected static function setNotificationParams(NotificationQueue $queuedNotification, $params) {
-        $queuedNotification->relatedObjectType = \LH::getVal('relatedObjectType', $params);
-        $queuedNotification->relatedObjectId = \LH::getVal('relatedObjectId', $params);
-        $queuedNotification->toBeSentAt = \LH::getVal('toBeSentAt', $params);
+        $queuedNotification->relatedObjectType = LH::getVal('relatedObjectType', $params);
+        $queuedNotification->relatedObjectId = LH::getVal('relatedObjectId', $params);
+        $queuedNotification->toBeSentAt = LH::getVal('toBeSentAt', $params);
     }
 
     /**
      * Add an email to the queue.
      *
      * @param string $to
-     * @param array $renderedNotification
+     * @param array  $renderedNotification
      * @param array  $params
      * @throws MissingParamException
      */
@@ -54,9 +55,9 @@ class NotificationQueue extends Model {
     /**
      * Add a text message to the queue.
      *
-     * @param string      $to
-     * @param array      $renderedNotification
-     * @param array $params
+     * @param string $to
+     * @param array  $renderedNotification
+     * @param array  $params
      * @throws MissingParamException
      */
     public static function queueSms($to, $renderedNotification, $params = []) {
@@ -221,7 +222,7 @@ class NotificationQueue extends Model {
         $maxTries = Config::get('notifications::maxTriesNum');
         if ($queuedNotification->tryNo < $maxTries) {
             $retryTimes = Config::get('notifications::retryIn');
-            $retryIn = \LH::getVal($queuedNotification->tryNo - 1, $retryTimes, array_slice($retryTimes, -1)[0]);
+            $retryIn = LH::getVal($queuedNotification->tryNo - 1, $retryTimes, array_slice($retryTimes, -1)[0]);
             $queuedNotification->nextRetryAt = date(DB_DATE_FORMAT, strtotime($retryIn));
             echo "Will retry in {$retryIn}" . PHP_EOL;
         } else {
@@ -239,6 +240,7 @@ class NotificationQueue extends Model {
      */
     protected static function getTypeName($type) {
         $names = [self::TYPE_EMAIL => 'Email', self::TYPE_SMS => 'SMS'];
-        return \LH::getVal($type, $names, 'unknown');
+
+        return LH::getVal($type, $names, 'unknown');
     }
 }

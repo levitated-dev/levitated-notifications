@@ -16,10 +16,16 @@
         "erusev/parsedown": "*",
         "levitated/helpers": "1.0.*"
     },
+    "require-dev": {
+        "mockery/mockery": "dev-master@dev"
+    },
     "autoload": {
         "psr-0": {
             "Levitated\\Notifications": "src/"
-        }
+        },
+        "classmap": [
+            "tests/TestCase.php"
+        ]
     },
     "config": {
         "preferred-install": "dist"

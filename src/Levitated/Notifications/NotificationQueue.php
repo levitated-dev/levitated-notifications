@@ -62,7 +62,7 @@ class NotificationQueue extends Model implements NotificationQueueInterface {
      */
     public function queueSms($to, $renderedNotification, $params = []) {
         if (empty($to)) {
-            throw new MissingParamException("Could not send SMS.");
+            throw new MissingParamException("Could not send SMS, missing `to` field.");
         }
 
         $queuedNotification = new self();

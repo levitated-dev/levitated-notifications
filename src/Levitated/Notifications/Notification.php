@@ -86,7 +86,7 @@ class Notification implements NotificationInterface {
                 );
             }
         }
-/*
+
         // send SMSes to queue
         if (in_array(self::CHANNEL_SMS, $this->getChannels())) {
             if (empty($recipients['phones'])) {
@@ -105,10 +105,16 @@ class Notification implements NotificationInterface {
             );
 
             foreach ($recipients['phones'] as $phone) {
-                $this->queue->queueSms($phone, $renderedNotification, $params);
+                \Queue::push(
+                    'Levitated\Notifications\NotificationSender@sendSms',
+                    [
+                        'recipientPhone' => $phone,
+                        'renderedNotification' => $renderedNotification,
+                        'params' => $params
+                    ]
+                );
             }
         }
-*/
     }
 
     public function setSendTime($time) {

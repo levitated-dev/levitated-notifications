@@ -60,7 +60,12 @@ class NotificationSender {
         return $email;
     }
 
+    /**
+     * @param \Illuminate\Queue\Jobs\Job $job
+     * @param $data
+     */
     public function sendSms($job, $data) {
+        var_dump($job->getJobId());
         $recipientPhone = $data['recipientPhone'];
 
         if (self::sendOnlyToWhitelist()) {
@@ -69,9 +74,14 @@ class NotificationSender {
                 return;
             }
         }
+        if (!\Config::get('notifications::simulateSending')) {
+            $twilio = new \Services_Twilio(\Config::get('notifications::twilioSid'), \Config::get('notifications::twilioToken'));
 
-        if (!Config::get('notifications::simulateSending')) {
-            \Twilio::message($recipientPhone, $data['renderedNotification']['bodyPlain']);
+            $twilio->account->sms_messages->create(
+                \Config::get('notifications::twilioFrom'),
+                $recipientPhone,
+                $data['renderedNotification']['bodyPlain']
+            );
         }
         $job->delete();
     }

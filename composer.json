@@ -11,7 +11,7 @@
         "php": ">=5.3.0",
         "illuminate/support": "4.*",
         "aws/aws-sdk-php-laravel": "1.*",
-        "aloha/twilio": "1.0.*",
+        "twilio/php": "3.12.*",
         "barryvdh/laravel-twigbridge": "*",
         "erusev/parsedown": "*",
         "levitated/helpers": "1.0.*"

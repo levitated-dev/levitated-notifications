@@ -10,9 +10,8 @@ interface NotificationInterface {
      * @param string                                                 $viewName   Name of view for this notification.
      * @param array                                                  $viewData   Data passed to the view.
      * @param \Levitated\Notifications\NotificationRendererInterface $renderer   Renderer to be used.
-     * @param NotificationQueueInterface                             $queue
      */
-    public function __construct($recipients, $viewName, $viewData, NotificationRendererInterface $renderer, NotificationQueueInterface $queue);
+    public function __construct($recipients, $viewName, $viewData, NotificationRendererInterface $renderer);
 
     /**
      * @return array

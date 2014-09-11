@@ -14,6 +14,7 @@ class NotificationsServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->package('levitated/notifications');
+        $this->app->make('queue')->failing(array('Levitated\Notifications\NotificationSender', 'handleFailedJob'));
     }
 
     /**
@@ -28,13 +29,11 @@ class NotificationsServiceProvider extends ServiceProvider
         });
         $this->commands('command.levitated-notifications-daemon');
 
-        $this->app->register('Levitated\HelpersServiceProvider');
         $this->app->register('Aws\Laravel\AwsServiceProvider');
         $this->app->register('Barryvdh\TwigBridge\ServiceProvider');
         $this->app->register('Aloha\Twilio\TwilioServiceProvider');
 
         $loader = \Illuminate\Foundation\AliasLoader::getInstance();
-        $loader->alias('LH', 'Levitated\Helpers\LH');
         $loader->alias('Twig', 'Barryvdh\TwigBridge\Twig');
         $loader->alias('Twilio', 'Aloha\Twilio\Facades\Twilio');
         $loader->alias('AWS', 'Aws\Laravel\AwsFacade');

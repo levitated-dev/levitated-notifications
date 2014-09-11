@@ -5,10 +5,5 @@ class TestCase extends \PHPUnit_Framework_TestCase {
         return $this->getMockBuilder('Levitated\Notifications\NotificationRendererInterface')
             ->getMock();
     }
-
-    protected function getMockQueue() {
-        return $this->GetMockBuilder('Levitated\Notifications\NotificationQueueInterface')
-            ->getMock();
-    }
 }
 

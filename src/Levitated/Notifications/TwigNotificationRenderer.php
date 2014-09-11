@@ -1,5 +1,7 @@
 <?php namespace Levitated\Notifications;
 
+use Levitated\Helpers\LH;
+
 class TwigNotificationRenderer implements NotificationRendererInterface {
 
     public function render($type, $viewName, $data, $params = []) {
@@ -13,7 +15,7 @@ class TwigNotificationRenderer implements NotificationRendererInterface {
     }
 
     protected function _renderEmail($viewName, $data, $params = []) {
-        $htmlTemplate = \LH::getVal($params, 'emailTemplate', 'notifications::notifications/layouts/html.twig');
+        $htmlTemplate = LH::getVal($params, 'emailTemplate', 'notifications::notifications/layouts/html.twig');
 
         return [
             'subject'   => \Twig::render($viewName, $data + array('emailTemplate' => 'notifications::notifications/layouts/subject.twig')),

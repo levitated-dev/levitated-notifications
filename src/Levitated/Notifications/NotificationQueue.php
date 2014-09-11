@@ -79,7 +79,7 @@ class NotificationQueue extends Model implements NotificationQueueInterface {
      * @param int $amount
      * @throws \Exception
      */
-    public static function sendEmails($amount = 1) {
+    public function sendEmails($amount = 1) {
         $queuedEmailsIds = DB::select("SELECT id FROM notificationQueue
                   WHERE state='queued'
                   AND type='" . self::TYPE_EMAIL . "'
@@ -156,57 +156,42 @@ class NotificationQueue extends Model implements NotificationQueueInterface {
     }
 
     /**
-     * Determine if notifications will be sent only to white-listed addresses.
-     *
-     * @return mixed
-     */
-    public static function sendOnlyToWhitelist() {
-        return Config::get('notifications::sendOnlyToWhitelist');
-    }
-
-    /**
      * Send out text messages.
      *
      * @param int $amount
      * @throws \Exception
      */
-    public static function sendSmses($amount = 1) {
-        try {
-            $queuedSmsesIds = DB::select("SELECT id FROM notificationQueue
+    public function sendSmses($amount = 1) {
+
+        $queuedSmsesIds = DB::select("SELECT id FROM notificationQueue
                       WHERE state='queued'
                       AND type='" . self::TYPE_SMS . "'
                   AND (toBeSentAt IS NULL OR toBeSentAt <= CURRENT_TIMESTAMP)
                   AND (nextRetryAt IS NULL OR nextRetryAt < CURRENT_TIMESTAMP)
                   LIMIT ?", [$amount]);
 
-            foreach ($queuedSmsesIds as $queuedSmsId) {
-                $queuedSms = self::find($queuedSmsId->id);
-                echo '[' . date('Y-m-d H:i:s') . "] Sending SMS [ID: {$queuedSms->id}]: {$queuedSms->to}...";
-                if (self::sendOnlyToWhitelist()) {
-                    if (!in_array($queuedSms->to, Config::get('notifications::phoneNumberWhiteList'))) {
-                        echo 'skipped';
-                        $queuedSms->state = 'skipped';
-                        $queuedSms->save();
-                        continue;
-                    }
+        foreach ($queuedSmsesIds as $queuedSmsId) {
+            $queuedSms = self::find($queuedSmsId->id);
+            echo '[' . date('Y-m-d H:i:s') . "] Sending SMS [ID: {$queuedSms->id}]: {$queuedSms->to}...";
+            if (self::sendOnlyToWhitelist()) {
+                if (!in_array($queuedSms->to, Config::get('notifications::phoneNumberWhiteList'))) {
+                    echo 'skipped';
+                    $queuedSms->state = 'skipped';
+                    $queuedSms->save();
+                    continue;
                 }
-
-                if (!Config::get('notifications::simulateSending')) {
-                    \Twilio::message($queuedSms->to, $queuedSms->bodyPlain);
-                }
-
-                $queuedSms->state = 'sent';
-                $queuedSms->sentAt = date(DB_DATE_FORMAT);
-                $queuedSms->save();
-                self::generateEvents($queuedSms);
-
-                echo 'done' . PHP_EOL;
             }
-        } catch (\Exception $e) {
-            if (isset($queuedSms)) {
-                self::processFailedNotification($queuedSms, $e);
+
+            if (!Config::get('notifications::simulateSending')) {
+                \Twilio::message($queuedSms->to, $queuedSms->bodyPlain);
             }
-            throw $e;
+
+            $queuedSms->state = 'sent';
+            $queuedSms->sentAt = date(DB_DATE_FORMAT);
+            $queuedSms->save();
+            self::generateEvents($queuedSms);
+
+            echo 'done' . PHP_EOL;
         }
     }
 

@@ -1,10 +1,10 @@
 <?php namespace Levitated\Notifications;
 
+use Illuminate\Queue\QueueManager;
 use Levitated\Helpers\LH;
 
 class Notification implements NotificationInterface {
     protected $renderer;
-    protected $queue;
 
     protected $viewData;
     protected $channels = [];
@@ -19,12 +19,11 @@ class Notification implements NotificationInterface {
 
     protected $data;
 
-    public function __construct($recipients, $viewName, $viewData, NotificationRendererInterface $renderer, NotificationQueueInterface $queue) {
+    public function __construct($recipients, $viewName, $viewData, NotificationRendererInterface $renderer) {
         $this->setRecipients($recipients);
         $this->setViewData($viewData);
         $this->setViewName($viewName);
         $this->renderer = $renderer;
-        $this->queue = $queue;
     }
 
     public function setChannelsAuto() {
@@ -62,7 +61,7 @@ class Notification implements NotificationInterface {
         // send emails to queue
         if (in_array(self::CHANNEL_EMAIL, $this->getChannels())) {
             if (empty($recipients['emails'])) {
-                throw new EmailNotSetException('No recipient phone provided for the SMS channel.');
+                throw new EmailNotSetException('No email addresses provided.');
             }
 
             if (!is_array($recipients['emails'])) {
@@ -76,11 +75,18 @@ class Notification implements NotificationInterface {
                 $params
             );
 
-            foreach ($recipients['emails'] as $email) {
-                $this->queue->queueEmail($email, $renderedNotification, $params);
+            foreach ($recipients['emails'] as $recipientEmail) {
+                \Queue::push(
+                    'Levitated\Notifications\NotificationSender@sendEmail',
+                    [
+                        'recipientEmail' => $recipientEmail,
+                        'renderedNotification' => $renderedNotification,
+                        'params' => $params
+                    ]
+                );
             }
         }
-
+/*
         // send SMSes to queue
         if (in_array(self::CHANNEL_SMS, $this->getChannels())) {
             if (empty($recipients['phones'])) {
@@ -102,6 +108,7 @@ class Notification implements NotificationInterface {
                 $this->queue->queueSms($phone, $renderedNotification, $params);
             }
         }
+*/
     }
 
     public function setSendTime($time) {

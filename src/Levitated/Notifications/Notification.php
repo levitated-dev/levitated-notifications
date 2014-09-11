@@ -5,6 +5,8 @@ use Levitated\Helpers\LH;
 
 class Notification implements NotificationInterface {
     protected $renderer;
+    protected $emailSender;
+    protected $smsSender;
 
     protected $viewData;
     protected $channels = [];
@@ -19,11 +21,20 @@ class Notification implements NotificationInterface {
 
     protected $data;
 
-    public function __construct($recipients, $viewName, $viewData, NotificationRendererInterface $renderer) {
+    public function __construct(
+        $recipients,
+        $viewName,
+        $viewData,
+        NotificationRendererInterface $renderer,
+        NotificationEmailSenderInterface $emailSender = null,
+        NotificationSmsSenderInterface $smsSender = null
+    ) {
         $this->setRecipients($recipients);
         $this->setViewData($viewData);
         $this->setViewName($viewName);
         $this->renderer = $renderer;
+        $this->emailSender = $emailSender;
+        $this->smsSender = $smsSender;
     }
 
     public function setChannelsAuto() {
@@ -76,18 +87,26 @@ class Notification implements NotificationInterface {
             );
 
             foreach ($recipients['emails'] as $recipientEmail) {
+                if ($this->sendOnlyToWhitelist()) {
+                    // skip emails not matching regexes on the white list
+                    foreach (\Config::get('notifications::emailsWhiteList') as $emailRegex) {
+                        if (!preg_match($emailRegex, $recipientEmail)) {
+                            continue;
+                        }
+                    }
+                }
+
                 \Queue::push(
-                    'Levitated\Notifications\NotificationSender@sendEmail',
+                    get_class($this->emailSender),
                     [
-                        'recipientEmail' => $recipientEmail,
+                        'recipientEmail'       => $recipientEmail,
                         'renderedNotification' => $renderedNotification,
-                        'params' => $params
+                        'params'               => $params
                     ]
                 );
             }
         }
 
-        // send SMSes to queue
         if (in_array(self::CHANNEL_SMS, $this->getChannels())) {
             if (empty($recipients['phones'])) {
                 throw new PhoneNumberNotSetException('No recipient phone provided for the SMS channel.');
@@ -104,13 +123,19 @@ class Notification implements NotificationInterface {
                 $params
             );
 
-            foreach ($recipients['phones'] as $phone) {
+            foreach ($recipients['phones'] as $recipientPhone) {
+                if (self::sendOnlyToWhitelist()) {
+                    if (!in_array($recipientPhone, \Config::get('notifications::phoneNumberWhiteList'))) {
+                        continue;
+                    }
+                }
+
                 \Queue::push(
                     'Levitated\Notifications\NotificationSender@sendSms',
                     [
-                        'recipientPhone' => $phone,
+                        'recipientPhone'       => $recipientPhone,
                         'renderedNotification' => $renderedNotification,
-                        'params' => $params
+                        'params'               => $params
                     ]
                 );
             }
@@ -193,5 +218,14 @@ class Notification implements NotificationInterface {
 
     public function getChannels() {
         return $this->channels;
+    }
+
+    /**
+     * Determine if notifications will be sent only to white-listed addresses.
+     *
+     * @return mixed
+     */
+    protected function sendOnlyToWhitelist() {
+        return \Config::get('notifications::sendOnlyToWhitelist');
     }
 }

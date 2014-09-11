@@ -2,13 +2,15 @@
 
 return [
     'rendererClassName' => 'Levitated\Notifications\TwigNotificationRenderer',
+    'emailSenderClassName' => 'Levitated\Notifications\SesNotificationEmailSender',
+    'smsSenderClassName' => 'Levitated\Notifications\TwilioNotificationEmailSender',
 
     // fill with a verified SES sender
-    'emailFrom' => 'name <verified@sender.com>',
+    'emailFrom' => 'Name <name@example.com>',
 
-    'twilioSid' => '',
-    'twilioToken' => '',
-    'twilioFrom' => '',
+    'twilioSid' => '[put sid here]',
+    'twilioToken' => '[put token here]',
+    'twilioFrom' => '[put twilio phone here]',
 
     // number of sending tried before giving up.
     'maxAttempts' => 8,

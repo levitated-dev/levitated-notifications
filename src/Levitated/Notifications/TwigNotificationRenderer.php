@@ -7,14 +7,14 @@ class TwigNotificationRenderer implements NotificationRendererInterface {
     public function render($type, $viewName, $data, $params = []) {
         switch ($type) {
             case self::EMAIL:
-                return $this->_renderEmail($viewName, $data, $params);
+                return $this->renderEmail($viewName, $data, $params);
 
             case self::SMS:
-                return $this->_renderSms($viewName, $data);
+                return $this->renderSms($viewName, $data);
         }
     }
 
-    protected function _renderEmail($viewName, $data, $params = []) {
+    protected function renderEmail($viewName, $data, $params = []) {
         $htmlTemplate = LH::getVal($params, 'emailTemplate', 'notifications::notifications/layouts/html.twig');
 
         return [
@@ -24,7 +24,7 @@ class TwigNotificationRenderer implements NotificationRendererInterface {
         ];
     }
 
-    protected function _renderSms($viewName, $data) {
+    protected function renderSms($viewName, $data) {
         return [
             'bodyPlain' => \Twig::render($viewName, $data + array('emailTemplate' => 'notifications::notifications/layouts/plain.twig'))
         ];

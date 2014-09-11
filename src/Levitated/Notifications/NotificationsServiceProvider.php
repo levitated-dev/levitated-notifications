@@ -38,11 +38,17 @@ class NotificationsServiceProvider extends ServiceProvider
 
         $this->app->bind('NotificationRenderer', function($app) {
             $rendererClassName = \Config::get('notifications::rendererClassName');
-            if (!class_exists($rendererClassName)) {
-                // probable cause: the renderer package is not installed/configured correctly
-                throw new \Exception("Class $rendererClassName doesn't exist.");
-            }
             return new $rendererClassName;
+        });
+
+        $this->app->bind('NotificationEmailSender', function($app) {
+            $senderClassName = \Config::get('notifications::emailSenderClassName');
+            return new $senderClassName;
+        });
+
+        $this->app->bind('NotificationSmsSender', function($app) {
+            $senderClassName = \Config::get('notifications::smsSenderClassName');
+            return new $senderClassName;
         });
     }
 

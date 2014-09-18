@@ -4,7 +4,15 @@ class SesNotificationEmailSender implements NotificationEmailSenderInterface {
     public function fire($job, $data) {
         $email = $this->getSESParams($data);
         $ses = \App::make('aws')->get('ses');
-        $result = $ses->sendEmail($email);
+        try {
+            $ses->sendEmail($email);
+        } catch (\Exception $e) {
+            if ($job->attempts() < \Config::get('notifications::maxAttempts')) {
+                $job->release(15);
+            } else {
+                throw $e;
+            }
+        }
         $job->delete();
     }
 

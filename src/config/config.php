@@ -29,8 +29,7 @@ return [
     // In debug mode emails will be sent ONLY to addresses matching the following regexes. Others will be skipped.
     'emailsWhiteList' => ['/@levitated\.pl|@mycollegetimeline\.com/'],
 
-    'daemonIterations' => 500,
-    'maxSentEmailsPerSecond' => 1,
-    'maxSentSmsesPerSecond' => 1,
-    'daemonSleepAfterError' => 1,
+    'logNotificationsInDb' => true,
+    'dbNotificationModel' => 'Levitated\Notifications\NotificationLog',
+    'dbConnection' => null,
 ];

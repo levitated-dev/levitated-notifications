@@ -1,6 +1,35 @@
 <?php namespace Levitated\Notifications;
 
-class NotificationTest extends TestCase {
+use \Mockery as m;
+
+class NotificationTest extends \Orchestra\Testbench\TestCase {
+
+
+    protected function getPackageAliases()
+    {
+        return array(
+            'NotificationLogger' => 'Levitated\Notifications\Facades\NotificationLogger'
+        );
+    }
+
+    protected function getPackageProviders()
+    {
+        return array('Levitated\Notifications\NotificationsServiceProvider');
+    }
+
+    protected function getMockRenderer() {
+        return m::mock('Levitated\Notifications\NotificationRendererInterface');
+    }
+
+    protected function getMockEmailSender()
+    {
+        return m::mock('Levitated\Notifications\NotificationEmailSenderInterface');
+    }
+
+    protected function getMockSmsSender()
+    {
+        return m::mock('Levitated\Notifications\NotificationSmsSenderInterface');
+    }
 
     public function testSetChannelsAuto() {
         $renderer = $this->getMockRenderer();
@@ -25,18 +54,58 @@ class NotificationTest extends TestCase {
         $this->assertCount(2, $channels);
     }
 
-    public function testSend() {
-        // todo with laravel queue
-        return;
-        $queue = $this->getMockBuilder('Levitated\Notifications\NotificationQueueInterface')
-            ->getMock();
-        $queue->expects($this->once())
-            ->method('queueEmail');
-        $queue->expects($this->exactly(2))
-            ->method('queueSms');
-
+    public function testSendEmail() {
         $renderer = $this->getMockRenderer();
-        $n = new Notification(['emails' => ['foo@example.com'], 'phones' => ['123 123 123', '456 456 456']], 'bar', [], $renderer);
+        $sender = $this->getMockEmailSender();
+
+        \Queue::shouldReceive('push')
+            ->once()
+            ->with(
+                get_class($sender),
+                m::contains('foo@example.com') // TODO: more precise check
+        );
+
+        $renderer->shouldReceive('render');
+        $n = new Notification(['emails' => ['foo@example.com']], 'bar', [], $renderer, $sender);
+        $n->send();
+    }
+
+    public function testSendSms() {
+        $renderer = $this->getMockRenderer();
+        $sender = $this->getMockSmsSender();
+
+        \Queue::shouldReceive('push')
+            ->once()
+            ->with(
+                get_class($sender),
+                m::contains('123 123 123')
+            );
+
+        $renderer->shouldReceive('render');
+        $n = new Notification(['phones' => ['123 123 123']], 'bar', [], $renderer, null, $sender);
+        $n->send();
+    }
+
+    public function testLogging()
+    {
+        $renderer = $this->getMockRenderer();
+        $sender = $this->getMockEmailSender();
+        \Config::set('notifications::logNotificationsInDb', true);
+/*
+        \NotificationLogger::shouldReceive('addNotification')
+            ->times(3);
+*/
+        $renderer->shouldReceive('render');
+        $n = new Notification(
+            [
+                'emails' => ['foo@example.com', 'bar@example.com'],
+                'phones' => ['123 123 123']
+            ],
+            'bar',
+            [],
+            $renderer,
+            $sender
+        );
         $n->send();
     }
 

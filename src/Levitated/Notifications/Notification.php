@@ -3,22 +3,28 @@
 use Illuminate\Queue\QueueManager;
 use Levitated\Helpers\LH;
 
+/**
+ * Class Notification
+ *
+ * @todo    implement sentAt
+ * @package Levitated\Notifications
+ */
 class Notification implements NotificationInterface {
     protected $renderer;
     protected $emailSender;
     protected $smsSender;
 
     protected $viewData;
+
     protected $channels = [];
     protected $recipients;
-
     protected $emailViewName;
-    protected $smsViewName;
 
+    protected $smsViewName;
     protected $relatedObjectType = 'unknown';
+
     protected $relatedObjectId;
     protected $toBeSentAt;
-
     protected $data;
 
     public function __construct(
@@ -37,6 +43,9 @@ class Notification implements NotificationInterface {
         $this->smsSender = $smsSender;
     }
 
+    /**
+     * Automatically determine what channels is the notification using based on recipients list.
+     */
     public function setChannelsAuto() {
         $recipients = $this->getRecipients();
         $channels = [];
@@ -51,6 +60,8 @@ class Notification implements NotificationInterface {
     }
 
     /**
+     * Send the notification by inserting rendered emails and smses in the sending queue.
+     *
      * @throws PhoneNumberNotSetException
      * @throws EmailNotSetException
      */
@@ -69,7 +80,18 @@ class Notification implements NotificationInterface {
             'toBeSentAt'        => $this->toBeSentAt
         ];
 
-        // send emails to queue
+        $this->sendEmails($viewName, $viewData, $recipients, $params);
+        $this->sendSmses($viewName, $viewData, $recipients, $params);
+    }
+
+    /**
+     * @param string $viewName
+     * @param array  $viewData
+     * @param array  $recipients
+     * @param array  $params
+     * @throws EmailNotSetException
+     */
+    protected function sendEmails($viewName, $viewData, $recipients, $params) {
         if (in_array(self::CHANNEL_EMAIL, $this->getChannels())) {
             if (empty($recipients['emails'])) {
                 throw new EmailNotSetException('No email addresses provided.');
@@ -96,17 +118,28 @@ class Notification implements NotificationInterface {
                     }
                 }
 
-                \Queue::push(
-                    get_class($this->emailSender),
-                    [
-                        'recipientEmail'       => $recipientEmail,
-                        'renderedNotification' => $renderedNotification,
-                        'params'               => $params
-                    ]
-                );
+                $data = [
+                    'recipientEmail'       => $recipientEmail,
+                    'renderedNotification' => $renderedNotification,
+                    'params'               => $params
+                ];
+
+                if (\Config::get('notifications::logNotificationsInDb')) {
+                    $data['logId'] = \NotificationLogger::addNotification(self::CHANNEL_EMAIL, $data);
+                }
+                \Queue::push(get_class($this->emailSender), $data);
             }
         }
+    }
 
+    /**
+     * @param string $viewName
+     * @param array  $viewData
+     * @param array  $recipients
+     * @param array  $params
+     * @throws PhoneNumberNotSetException
+     */
+    protected function sendSmses($viewName, $viewData, $recipients, $params) {
         if (in_array(self::CHANNEL_SMS, $this->getChannels())) {
             if (empty($recipients['phones'])) {
                 throw new PhoneNumberNotSetException('No recipient phone provided for the SMS channel.');
@@ -130,14 +163,16 @@ class Notification implements NotificationInterface {
                     }
                 }
 
-                \Queue::push(
-                    'Levitated\Notifications\NotificationSender@sendSms',
-                    [
-                        'recipientPhone'       => $recipientPhone,
-                        'renderedNotification' => $renderedNotification,
-                        'params'               => $params
-                    ]
-                );
+                $data = [
+                    'recipientPhone'       => $recipientPhone,
+                    'renderedNotification' => $renderedNotification,
+                    'params'               => $params
+                ];
+
+                if (\Config::get('notifications::logNotificationsInDb')) {
+                    $data['logId'] = \NotificationLogger::addNotification(self::CHANNEL_SMS, $data);
+                }
+                \Queue::push(get_class($this->smsSender), $data);
             }
         }
     }

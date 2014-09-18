@@ -24,7 +24,8 @@
             "Levitated\\Notifications": "src/"
         },
         "classmap": [
-            "tests/TestCase.php"
+            "tests/TestCase.php",
+            "src/models"
         ]
     },
     "config": {

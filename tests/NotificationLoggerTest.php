@@ -26,6 +26,13 @@ class NotificationLoggerTest extends TestCase  {
             'params'               => ['param' => 'test']
         ];
 
-        \NotificationLogger::addNotification(NotificationInterface::CHANNEL_EMAIL, $data);
+        $notificationId = \NotificationLogger::addNotification(NotificationInterface::CHANNEL_EMAIL, $data);
+        $logEntry = \NotificationLogger::findOrFail($notificationId);
+
+        $this->assertSame('foo@example.com', $logEntry->recipientEmail);
+        $this->assertSame(['param' => 'test'], $logEntry->getParams());
+        $this->assertSame('foo', $logEntry->subject);
+        $this->assertSame('bar', $logEntry->bodyPlain);
+        $this->assertSame('foobar', $logEntry->bodyHtml);
     }
 }

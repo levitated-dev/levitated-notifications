@@ -1,9 +1,11 @@
 <?php namespace Levitated\Notifications;
 
+use \Levitated\Helpers\LH;
+
 class NotificationLogger extends \Eloquent
 {
     protected $table = 'notificationsLog';
-    protected $fillable = ['channel', 'recipientEmail', 'recipientPhone', 'bodyPlan', 'bodyHtml', 'subject', 'params'];
+    protected $fillable = ['channel', 'recipientEmail', 'recipientPhone', 'bodyPlain', 'bodyHtml', 'subject', 'params'];
     public $timestamps = false;
 
     public function __construct(array $attributes = array())
@@ -37,12 +39,17 @@ class NotificationLogger extends \Eloquent
         }
 
         $this->channel = $channel;
-        $this->params = json_encode($data['params']);
+        $this->params = json_encode(LH::getVal('params', $data, []));
         if ($data['renderedNotification']) {
             $this->fill($data['renderedNotification']);
         }
         $this->save();
         return $this->id;
+    }
+
+    public function getParams()
+    {
+        return (array)json_decode($this->params, true);
     }
 
     /**

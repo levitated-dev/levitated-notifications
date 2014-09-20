@@ -10,7 +10,6 @@ class NotificationTest extends \Illuminate\Foundation\Testing\TestCase {
      * @return \Symfony\Component\HttpKernel\HttpKernelInterface
      */
     public function createApplication() {
-        // TODO: Implement createApplication() method.
         return require __DIR__.'/../../../../bootstrap/start.php';
     }
 

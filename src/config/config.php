@@ -3,7 +3,7 @@
 return [
     'rendererClassName' => 'Levitated\Notifications\TwigNotificationRenderer',
     'emailSenderClassName' => 'Levitated\Notifications\SesNotificationEmailSender',
-    'smsSenderClassName' => 'Levitated\Notifications\TwilioNotificationEmailSender',
+    'smsSenderClassName' => 'Levitated\Notifications\TwilioNotificationSmsSender',
 
     // fill with a verified SES sender
     'emailFrom' => 'Name <name@example.com>',

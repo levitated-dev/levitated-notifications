@@ -1,20 +1,6 @@
 <?php namespace Levitated\Notifications;
 
-use \Mockery as m;
-
-class NotificationLoggerTest extends TestCase  {
-    protected function getPackageAliases()
-    {
-        return array(
-            'NotificationLogger' => 'Levitated\Notifications\Facades\NotificationLogger'
-        );
-    }
-
-    protected function getPackageProviders()
-    {
-        return array('Levitated\Notifications\NotificationsServiceProvider');
-    }
-
+class NotificationLoggerTest extends TestCase {
     public function testAddEmailNotification() {
         $data = [
             'recipientEmail'       => 'foo@example.com',

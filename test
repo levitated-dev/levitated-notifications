@@ -1,0 +1,3 @@
+#!/bin/bash
+mysql -u homestead --password=secret --execute="drop database homestead_test; create database homestead_test"
+phpunit

@@ -1,6 +1,12 @@
 <?php namespace Levitated\Notifications;
 
 class SesNotificationEmailSender implements NotificationEmailSenderInterface {
+
+    /**
+     * @param \Illuminate\Queue\Jobs\Job $job
+     * @param array                      $data
+     * @throws \Exception
+     */
     public function fire($job, $data) {
         $email = $this->getSESParams($data);
         $ses = \App::make('aws')->get('ses');
@@ -9,6 +15,7 @@ class SesNotificationEmailSender implements NotificationEmailSenderInterface {
         } catch (\Exception $e) {
             if ($job->attempts() < \Config::get('notifications::maxAttempts')) {
                 $job->release(15);
+                return;
             } else {
                 throw $e;
             }
@@ -16,30 +23,34 @@ class SesNotificationEmailSender implements NotificationEmailSenderInterface {
         $job->delete();
     }
 
+    /**
+     * @param $data
+     * @return array
+     */
     protected function getSESParams($data) {
-        $email = array(
+        $email = [
             'Source'      => \Config::get('notifications::emailFrom'),
-            'Destination' => array(
+            'Destination' => [
                 'ToAddresses' => [$data['recipientEmail']],
-            ),
-            'Message'     => array(
-                'Subject' => array(
+            ],
+            'Message'     => [
+                'Subject' => [
                     'Data'    => $data['renderedNotification']['subject'],
                     'Charset' => 'utf8',
-                ),
-                'Body'    => array(
-                    'Text' => array(
+                ],
+                'Body'    => [
+                    'Text' => [
                         'Data'    => $data['renderedNotification']['bodyPlain'],
                         'Charset' => 'utf8',
-                    ),
-                    'Html' => array(
+                    ],
+                    'Html' => [
                         'Data'    => $data['renderedNotification']['bodyHtml'],
                         'Charset' => 'utf8',
-                    ),
-                ),
-            ),
+                    ],
+                ],
+            ],
             'ReturnPath'  => \Config::get('notifications::emailReturnPath'),
-        );
+        ];
 
         if (!empty($params['replyTo'])) {
             $email['ReplyToAddresses'] = $params['replyTo'];

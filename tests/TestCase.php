@@ -28,14 +28,13 @@ class TestCase extends \Illuminate\Foundation\Testing\TestCase {
 
     protected function setUpDb()
     {
-        //$artisan = $this->app->make('artisan');
-        \Artisan::call('migrate'); //, array('--path', 'workbench/levitated/notifications/src/migrations')
-        \Artisan::call('migrate', ['--workbench' => 'levitated/notifications']);
+        \Artisan::call('migrate');
+        \Artisan::call('migrate', ['--bench' => 'levitated/notifications']);
     }
 
     public function teardownDb()
     {
-        //\Artisan::call('migrate:reset');
+        \Artisan::call('migrate:reset');
     }
 
     protected function getMockRenderer() {

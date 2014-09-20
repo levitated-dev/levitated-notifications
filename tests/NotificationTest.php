@@ -2,20 +2,32 @@
 
 use \Mockery as m;
 
-class NotificationTest extends \Orchestra\Testbench\TestCase {
-
-
-    protected function getPackageAliases()
-    {
-        return array(
-            'NotificationLogger' => 'Levitated\Notifications\Facades\NotificationLogger'
-        );
+class NotificationTest extends \Illuminate\Foundation\Testing\TestCase {
+    /**
+     * Creates the application.
+     * Needs to be implemented by subclasses.
+     *
+     * @return \Symfony\Component\HttpKernel\HttpKernelInterface
+     */
+    public function createApplication() {
+        // TODO: Implement createApplication() method.
+        return require __DIR__.'/../../../../bootstrap/start.php';
     }
 
-    protected function getPackageProviders()
-    {
-        return array('Levitated\Notifications\NotificationsServiceProvider');
-    }
+
+
+    //
+//    protected function getPackageAliases()
+//    {
+//        return array(
+//            'NotificationLogger' => 'Levitated\Notifications\Facades\NotificationLogger'
+//        );
+//    }
+//
+//    protected function getPackageProviders()
+//    {
+//        return array('Levitated\Notifications\NotificationsServiceProvider');
+//    }
 
     protected function getMockRenderer() {
         return m::mock('Levitated\Notifications\NotificationRendererInterface');

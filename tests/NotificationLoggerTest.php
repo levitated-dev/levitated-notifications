@@ -2,7 +2,7 @@
 
 use \Mockery as m;
 
-class NotificationLoggerTest extends  \Orchestra\Testbench\TestCase {
+class NotificationLoggerTest extends TestCase  {
     protected function getPackageAliases()
     {
         return array(

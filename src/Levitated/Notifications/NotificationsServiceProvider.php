@@ -12,7 +12,6 @@ class NotificationsServiceProvider extends ServiceProvider {
 
     public function boot() {
         $this->package('levitated/notifications');
-        //$this->app->make('queue')->failing(array('Levitated\Notifications\NotificationSender', 'handleFailedJob'));
     }
 
     /**

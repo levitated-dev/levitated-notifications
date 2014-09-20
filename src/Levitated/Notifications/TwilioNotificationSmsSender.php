@@ -1,6 +1,6 @@
 <?php namespace Levitated\Notifications;
 
-class TwilioNotificationSmsSender implements NotificationSmsSenderInterface {
+class TwilioNotificationSmsSender extends NotificationSender implements NotificationSmsSenderInterface {
     public function fire($job, $data) {
         try {
             \Aloha\Twilio\Facades\Twilio::message(
@@ -9,11 +9,7 @@ class TwilioNotificationSmsSender implements NotificationSmsSenderInterface {
             );
             $job->delete();
         } catch (\Exception $e) {
-            if ($job->attempts() < \Config::get('notifications::maxAttempts')) {
-                $job->release(15);
-            } else {
-                throw $e;
-            }
+            $this->handleFailedJob($e, $job, $data);
         }
     }
 }

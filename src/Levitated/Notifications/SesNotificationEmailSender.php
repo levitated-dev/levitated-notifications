@@ -1,6 +1,6 @@
 <?php namespace Levitated\Notifications;
 
-class SesNotificationEmailSender implements NotificationEmailSenderInterface {
+class SesNotificationEmailSender extends NotificationSender implements NotificationEmailSenderInterface {
 
     /**
      * @param \Illuminate\Queue\Jobs\Job $job
@@ -14,11 +14,7 @@ class SesNotificationEmailSender implements NotificationEmailSenderInterface {
             $ses->sendEmail($email);
             $job->delete();
         } catch (\Exception $e) {
-            if ($job->attempts() < \Config::get('notifications::maxAttempts')) {
-                $job->release(15);
-            } else {
-                throw $e;
-            }
+            $this->handleFailedJob($e, $job, $data);
         }
     }
 

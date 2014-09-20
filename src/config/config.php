@@ -14,7 +14,7 @@ return [
 
     // number of sending tried before giving up.
     'maxAttempts' => 8,
-    'retryIn' => ['1', '2', '3', '10', '60'],
+    'retryTimes' => ['1', '2', '3', '10', '60'],
 
     'sendOnlyToWhitelist' => false,
 

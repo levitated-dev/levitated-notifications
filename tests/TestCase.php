@@ -50,5 +50,9 @@ class TestCase extends \Illuminate\Foundation\Testing\TestCase {
     {
         return m::mock('Levitated\Notifications\NotificationSmsSenderInterface');
     }
+
+    protected function getJob() {
+        return m::mock('\Illuminate\Queue\Jobs\RedisJob');
+    }
 }
 

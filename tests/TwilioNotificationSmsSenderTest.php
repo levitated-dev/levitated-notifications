@@ -3,75 +3,48 @@
 use Mockery as m;
 
 class TwilioNotificationSmsSenderTest extends TestCase {
-
-    protected function setupSesMock() {
-        $sesClient = m::mock('Aws\Ses\SesClient');
-        \Aws\Laravel\AwsFacade::shouldReceive('get')->andReturn($sesClient);
-
-        return $sesClient;
-    }
-
     public function testFire() {
-        $this->setupSesMock()->shouldReceive('sendEmail');
+        \Aloha\Twilio\Facades\Twilio::shouldReceive('message');
         $job = $this->getJob();
         $job->shouldReceive('delete');
-        $sender = new SesNotificationEmailSender();
-        $sender->fire(
-            $job,
-            [
-                'renderedNotification' => [
-                    'subject'   => 'foo',
-                    'bodyPlain' => 'plain',
-                    'bodyHtml'  => 'html'
-                ],
-                'recipientEmail'       => 'jan@levitated.pl',
-                'params'               => []
-            ]
-        );
+
+        $this->callSender($job);
     }
 
     public function testSendingFailedOnce() {
-        $this->setupSesMock()->shouldReceive('sendEmail')->andThrow(new \Exception());
+        \Aloha\Twilio\Facades\Twilio::shouldReceive('message');
         $job = $this->getJob();
         $job->shouldReceive('attempts')->andReturn(1);
         $job->shouldReceive('release');
-        $sender = new SesNotificationEmailSender();
+        $this->callSender($job);
+    }
+
+    public function testSendingFailedTooManyTimes() {
+        \Aloha\Twilio\Facades\Twilio::shouldReceive('message');
+        $job = $this->getJob();
+        $job->shouldReceive('attempts')->andReturn(\Config::get('notifications::maxAttempts'));
+        $job->shouldReceive('release');
+
+        try {
+            $this->callSender($job);
+            $this->fail('Fire should throw an exception.');
+        } catch (\Exception $e) {
+        }
+    }
+
+    protected function callSender($job)
+    {
+        $sender = new TwilioNotificationSmsSender();
         $sender->fire(
             $job,
             [
                 'renderedNotification' => [
                     'subject'   => 'foo',
                     'bodyPlain' => 'plain',
-                    'bodyHtml'  => 'html'
                 ],
-                'recipientEmail'       => 'jan@levitated.pl',
+                'recipientPhone'       => '123 123 123',
                 'params'               => []
             ]
         );
-    }
-
-    public function testSendingFailedTooManyTimes() {
-        $this->setupSesMock()->shouldReceive('sendEmail')->andThrow(new \Exception());
-        $job = $this->getJob();
-        $job->shouldReceive('attempts')->andReturn(\Config::get('notifications::maxAttempts'));
-        $job->shouldReceive('release');
-        $sender = new SesNotificationEmailSender();
-
-        try {
-            $sender->fire(
-                $job,
-                [
-                    'renderedNotification' => [
-                        'subject'   => 'foo',
-                        'bodyPlain' => 'plain',
-                        'bodyHtml'  => 'html'
-                    ],
-                    'recipientEmail'       => 'jan@levitated.pl',
-                    'params'               => []
-                ]
-            );
-            $this->fail('Fire should throw an exception.');
-        } catch (\Exception $e) {
-        }
     }
 }

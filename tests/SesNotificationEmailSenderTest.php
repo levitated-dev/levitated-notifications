@@ -48,7 +48,7 @@ class SesNotificationEmailSenderTest extends TestCase {
                     'bodyPlain' => 'plain',
                     'bodyHtml'  => 'html'
                 ],
-                'recipientEmail'       => 'jan@levitated.pl',
+                'recipientEmail'       => 'foo@example.com',
                 'params'               => []
             ]
         );

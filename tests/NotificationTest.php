@@ -98,29 +98,6 @@ class NotificationTest extends \Illuminate\Foundation\Testing\TestCase {
         $n->send();
     }
 
-    public function testLogging()
-    {
-        $renderer = $this->getMockRenderer();
-        $sender = $this->getMockEmailSender();
-        \Config::set('notifications::logNotificationsInDb', true);
-/*
-        \NotificationLogger::shouldReceive('addNotification')
-            ->times(3);
-*/
-        $renderer->shouldReceive('render');
-        $n = new Notification(
-            [
-                'emails' => ['foo@example.com', 'bar@example.com'],
-                'phones' => ['123 123 123']
-            ],
-            'bar',
-            [],
-            $renderer,
-            $sender
-        );
-        $n->send();
-    }
-
     public function testSetRecipients() {
         $renderer = $this->getMockRenderer();
 
@@ -139,5 +116,26 @@ class NotificationTest extends \Illuminate\Foundation\Testing\TestCase {
         $this->assertCount(1, $recipients);
         $this->assertArrayHasKey('emails', $recipients);
         $this->assertContains('foo@example.com', $recipients['emails']);
+    }
+
+    public function testLogging()
+    {
+        $renderer = $this->getMockRenderer();
+        $sender = $this->getMockEmailSender();
+        \Config::set('notifications::logNotificationsInDb', true);
+        \NotificationLogger::shouldReceive('addNotification')
+            ->times(3);
+        $renderer->shouldReceive('render');
+        $n = new Notification(
+            [
+                'emails' => ['foo@example.com', 'bar@example.com'],
+                'phones' => ['123 123 123']
+            ],
+            'bar',
+            [],
+            $renderer,
+            $sender
+        );
+        $n->send();
     }
 }

@@ -12,7 +12,7 @@ class NotificationsServiceProvider extends ServiceProvider {
 
     public function boot() {
         $this->package('levitated/notifications');
-        $this->app->make('queue')->failing(array('Levitated\Notifications\NotificationSender', 'handleFailedJob'));
+        //$this->app->make('queue')->failing(array('Levitated\Notifications\NotificationSender', 'handleFailedJob'));
     }
 
     /**
@@ -23,6 +23,7 @@ class NotificationsServiceProvider extends ServiceProvider {
     public function register() {
         $this->app->register('Aws\Laravel\AwsServiceProvider');
         $this->app->register('Barryvdh\TwigBridge\ServiceProvider');
+        $this->app->register('Aloha\Twilio\TwilioServiceProvider');
 
         $loader = \Illuminate\Foundation\AliasLoader::getInstance();
         $loader->alias('Twig', 'Barryvdh\TwigBridge\Twig');

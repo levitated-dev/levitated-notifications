@@ -14,21 +14,6 @@ class NotificationTest extends \Illuminate\Foundation\Testing\TestCase {
         return require __DIR__.'/../../../../bootstrap/start.php';
     }
 
-
-
-    //
-//    protected function getPackageAliases()
-//    {
-//        return array(
-//            'NotificationLogger' => 'Levitated\Notifications\Facades\NotificationLogger'
-//        );
-//    }
-//
-//    protected function getPackageProviders()
-//    {
-//        return array('Levitated\Notifications\NotificationsServiceProvider');
-//    }
-
     protected function getMockRenderer() {
         return m::mock('Levitated\Notifications\NotificationRendererInterface');
     }

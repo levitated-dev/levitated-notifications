@@ -1,10 +1,11 @@
 <?php namespace Levitated\Notifications;
 
 use Mockery as m;
+use \Aloha\Twilio\Facades\Twilio;
 
 class TwilioNotificationSmsSenderTest extends TestCase {
     public function testFire() {
-        \Aloha\Twilio\Facades\Twilio::shouldReceive('message');
+        Twilio::shouldReceive('message');
         $job = $this->getJob();
         $job->shouldReceive('delete');
 
@@ -12,7 +13,7 @@ class TwilioNotificationSmsSenderTest extends TestCase {
     }
 
     public function testSendingFailedOnce() {
-        \Aloha\Twilio\Facades\Twilio::shouldReceive('message');
+        Twilio::shouldReceive('message');
         $job = $this->getJob();
         $job->shouldReceive('attempts')->andReturn(1);
         $job->shouldReceive('release');
@@ -20,7 +21,7 @@ class TwilioNotificationSmsSenderTest extends TestCase {
     }
 
     public function testSendingFailedTooManyTimes() {
-        \Aloha\Twilio\Facades\Twilio::shouldReceive('message');
+        Twilio::shouldReceive('message');
         $job = $this->getJob();
         $job->shouldReceive('attempts')->andReturn(\Config::get('notifications::maxAttempts'));
         $job->shouldReceive('release');

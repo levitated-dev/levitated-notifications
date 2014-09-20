@@ -6,8 +6,6 @@ class NotificationSenderTest extends TestCase {
     public function setUp()
     {
         parent::setUp();
-        \Config::set('notifications::maxAttempts', 5);
-        \Config::set('notifications::retryTimes', [1, 2, 5, 10]);
     }
 
     public function testHandleFailedJobRelease() {

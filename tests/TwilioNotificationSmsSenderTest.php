@@ -8,7 +8,6 @@ class TwilioNotificationSmsSenderTest extends TestCase {
         Twilio::shouldReceive('message');
         $job = $this->getJob();
         $job->shouldReceive('delete');
-
         $this->callSender($job);
     }
 
@@ -25,7 +24,6 @@ class TwilioNotificationSmsSenderTest extends TestCase {
         $job = $this->getJob();
         $job->shouldReceive('attempts')->andReturn(\Config::get('notifications::maxAttempts'));
         $job->shouldReceive('release');
-
         try {
             $this->callSender($job);
             $this->fail('Fire should throw an exception.');
@@ -33,8 +31,7 @@ class TwilioNotificationSmsSenderTest extends TestCase {
         }
     }
 
-    protected function callSender($job)
-    {
+    protected function callSender($job) {
         $sender = new TwilioNotificationSmsSender();
         $sender->fire(
             $job,

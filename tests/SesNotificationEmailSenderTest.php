@@ -32,7 +32,7 @@ class SesNotificationEmailSenderTest extends TestCase {
         $job->shouldReceive('release');
 
         try {
-           $this->callSender($job);
+            $this->callSender($job);
             $this->fail('Fire should throw an exception.');
         } catch (\Exception $e) {
         }
@@ -53,5 +53,4 @@ class SesNotificationEmailSenderTest extends TestCase {
             ]
         );
     }
-
 }

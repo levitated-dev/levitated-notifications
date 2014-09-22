@@ -3,11 +3,6 @@
 use Mockery as m;
 
 class NotificationSenderTest extends TestCase {
-    public function setUp()
-    {
-        parent::setUp();
-    }
-
     public function testHandleFailedJobRelease() {
         $stub = $this->getMockForAbstractClass('\Levitated\Notifications\NotificationSender');
 

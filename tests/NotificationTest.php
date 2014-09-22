@@ -2,31 +2,7 @@
 
 use \Mockery as m;
 
-class NotificationTest extends \Illuminate\Foundation\Testing\TestCase {
-    /**
-     * Creates the application.
-     * Needs to be implemented by subclasses.
-     *
-     * @return \Symfony\Component\HttpKernel\HttpKernelInterface
-     */
-    public function createApplication() {
-        return require __DIR__.'/../../../../bootstrap/start.php';
-    }
-
-    protected function getMockRenderer() {
-        return m::mock('Levitated\Notifications\NotificationRendererInterface');
-    }
-
-    protected function getMockEmailSender()
-    {
-        return m::mock('Levitated\Notifications\NotificationEmailSenderInterface');
-    }
-
-    protected function getMockSmsSender()
-    {
-        return m::mock('Levitated\Notifications\NotificationSmsSenderInterface');
-    }
-
+class NotificationTest extends TestCase {
     public function testSetChannelsAuto() {
         $renderer = $this->getMockRenderer();
 
@@ -59,7 +35,7 @@ class NotificationTest extends \Illuminate\Foundation\Testing\TestCase {
             ->with(
                 get_class($sender),
                 m::contains('foo@example.com') // TODO: more precise check
-        );
+            );
 
         $renderer->shouldReceive('render');
         $n = new Notification(['emails' => ['foo@example.com']], 'bar', [], $renderer, $sender);
@@ -102,8 +78,7 @@ class NotificationTest extends \Illuminate\Foundation\Testing\TestCase {
         $this->assertContains('foo@example.com', $recipients['emails']);
     }
 
-    public function testLogging()
-    {
+    public function testLogging() {
         $renderer = $this->getMockRenderer();
         $sender = $this->getMockEmailSender();
         \Config::set('notifications::logNotificationsInDb', true);

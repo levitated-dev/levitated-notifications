@@ -8,11 +8,11 @@ class TestCase extends \Illuminate\Foundation\Testing\TestCase {
      *
      * @return \Symfony\Component\HttpKernel\HttpKernelInterface
      */
-    public function createApplication()
-    {
+    public function createApplication() {
         $unitTesting = true;
         $testEnvironment = 'testing';
-        return require __DIR__.'/../../../../bootstrap/start.php';
+
+        return require __DIR__ . '/../../../../bootstrap/start.php';
     }
 
     public function tearDown() {
@@ -20,8 +20,7 @@ class TestCase extends \Illuminate\Foundation\Testing\TestCase {
         $this->teardownDb();
     }
 
-    public function setUp()
-    {
+    public function setUp() {
         parent::setUp();
         $this->setUpDb();
 
@@ -29,14 +28,12 @@ class TestCase extends \Illuminate\Foundation\Testing\TestCase {
         \Config::set('notifications::retryTimes', [1, 2, 5, 10]);
     }
 
-    protected function setUpDb()
-    {
+    protected function setUpDb() {
         \Artisan::call('migrate');
         \Artisan::call('migrate', ['--bench' => 'levitated/notifications']);
     }
 
-    public function teardownDb()
-    {
+    public function teardownDb() {
         \Artisan::call('migrate:reset');
     }
 
@@ -44,13 +41,11 @@ class TestCase extends \Illuminate\Foundation\Testing\TestCase {
         return m::mock('Levitated\Notifications\NotificationRendererInterface');
     }
 
-    protected function getMockEmailSender()
-    {
+    protected function getMockEmailSender() {
         return m::mock('Levitated\Notifications\NotificationEmailSenderInterface');
     }
 
-    protected function getMockSmsSender()
-    {
+    protected function getMockSmsSender() {
         return m::mock('Levitated\Notifications\NotificationSmsSenderInterface');
     }
 

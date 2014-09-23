@@ -106,9 +106,16 @@ Edit config/packages/aloha/twilio with your appropriate Twilio settings
 
 The default Laravel Queue driver is ```sync``` which means the emails/smses will be sent immediately, causing a small delay. It also won't able to handle errors properly. Good for testing but it's recommended to use redis for queues in non-local environments.
 
+### Configure notification logger
+
+If ```logNotificationsInDb``` is set to true in the package config then all queued notifications will be saved in the database. In order to do this, you have to run migrations:
+
+```php artisan migrate --package=levitated/notifications```
+
 ### Configure for production usage
 
 In order to use Levitated Notifications in a production environment make sure you change the Laravel Queue to ```redis``` in ```config/app.php```:
+
 
 ```
     ...
@@ -118,7 +125,6 @@ In order to use Levitated Notifications in a production environment make sure yo
 and run the queue daemon [as described in the Laravel docs](http://laravel.com/docs/4.2/queues) or simply use
 
 ```php artisan queue:listen --tries=1```
-
 
 # Usage
 

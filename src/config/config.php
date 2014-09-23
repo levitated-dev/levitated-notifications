@@ -8,10 +8,6 @@ return [
     // fill with a verified SES sender
     'emailFrom' => 'Name <name@example.com>',
 
-    'twilioSid' => '[put sid here]',
-    'twilioToken' => '[put token here]',
-    'twilioFrom' => '[put twilio phone here]',
-
     // number of sending tried before giving up.
     'maxAttempts' => 8,
     'retryTimes' => ['1', '2', '3', '10', '60'],

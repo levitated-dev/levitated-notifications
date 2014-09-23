@@ -15,8 +15,13 @@ interface NotificationInterface {
      * @param NotificationSmsSenderInterface                         $smsSender
      * @internal param \Illuminate\Queue\QueueManager $queue
      */
-    public function __construct($recipients, $viewName, $viewData, NotificationRendererInterface $renderer, NotificationEmailSenderInterface $emailSender,
-                                NotificationSmsSenderInterface $smsSender
+    public function __construct(
+        $recipients,
+        $viewName,
+        $viewData,
+        NotificationRendererInterface $renderer = null,
+        NotificationEmailSenderInterface $emailSender = null,
+        NotificationSmsSenderInterface $smsSender = null
     );
 
     /**

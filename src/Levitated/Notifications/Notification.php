@@ -31,16 +31,16 @@ class Notification implements NotificationInterface {
         $recipients,
         $viewName,
         $viewData,
-        NotificationRendererInterface $renderer,
+        NotificationRendererInterface $renderer = null,
         NotificationEmailSenderInterface $emailSender = null,
         NotificationSmsSenderInterface $smsSender = null
     ) {
         $this->setRecipients($recipients);
         $this->setViewData($viewData);
         $this->setViewName($viewName);
-        $this->renderer = $renderer;
-        $this->emailSender = $emailSender;
-        $this->smsSender = $smsSender;
+        $this->renderer = LH::getVal(null, $renderer, \App::make('NotificationRenderer'));
+        $this->emailSender = LH::getVal(null, $emailSender, \App::make('NotificationEmailSender'));
+        $this->smsSender = LH::getVal(null, $smsSender, \App::make('NotificationSmsSender'));
     }
 
     /**

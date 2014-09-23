@@ -22,10 +22,15 @@ return [
     // In debug mode SMSes will be sent ONLY to these phone numbers. Others will be skipped.
     'phoneNumberWhiteList' => [],
 
-    // In debug mode emails will be sent ONLY to addresses matching the following regexes. Others will be skipped.
-    'emailsWhiteList' => ['/@levitated\.pl|@mycollegetimeline\.com/'],
+    // In debug mode emails will be sent ONLY to addresses matching the following *regexes*. Others will be skipped.
+    'emailsWhiteList' => ['/@levitated\.pl|@example\.com/'],
 
+    // If set to true all queued notifications will be also logged in mysql table by NotificationLog
     'logNotificationsInDb' => true,
+
+    // notification logger implementation
     'dbNotificationModel' => 'Levitated\Notifications\NotificationLog',
+
+    // connection name used
     'dbConnection' => null,
 ];

@@ -1,5 +1,7 @@
 <?php namespace Levitated\Notifications;
 
+use Levitated\Helpers\LH;
+
 class SesNotificationEmailSender extends NotificationSender implements NotificationEmailSenderInterface {
 
     /**
@@ -52,5 +54,19 @@ class SesNotificationEmailSender extends NotificationSender implements Notificat
         }
 
         return $email;
+    }
+
+    /**
+     * Add recipient email and subject to the error log data.
+     *
+     * @param $data
+     * @return array
+     */
+    protected function getErrorLogData($data) {
+        $logData = parent::getErrorLogData($data);
+        $logData['email'] = LH::getVal('recipientEmail', $data);
+        $renderedNotification = LH::getVal('renderedNotification', $data);
+        $logData['subject'] = LH::getVal('subject', $renderedNotification);
+        return $logData;
     }
 }

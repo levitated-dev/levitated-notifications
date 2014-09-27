@@ -26,6 +26,8 @@ class TestCase extends \Illuminate\Foundation\Testing\TestCase {
 
         \Config::set('notifications::maxAttempts', 5);
         \Config::set('notifications::retryTimes', [1, 2, 5, 10]);
+
+        \Log::swap(m::mock('Illuminate\Log\Writer')->shouldIgnoreMissing());
     }
 
     protected function setUpDb() {

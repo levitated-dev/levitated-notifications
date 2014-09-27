@@ -116,7 +116,6 @@ If ```logNotificationsInDb``` is set to true in the package config then all queu
 
 In order to use Levitated Notifications in a production environment make sure you change the Laravel Queue to ```redis``` in ```config/app.php```:
 
-
 ```
     ...
     'default' => 'redis',
@@ -143,4 +142,3 @@ And you're ready to start using the notifications:
     );
     $notification->send();
 ```
-

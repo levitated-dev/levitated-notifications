@@ -9,7 +9,8 @@ use Levitated\Helpers\LH;
  * @todo    implement sentAt
  * @package Levitated\Notifications
  */
-class Notification implements NotificationInterface {
+class Notification implements NotificationInterface
+{
     protected $renderer;
     protected $emailSender;
     protected $smsSender;
@@ -46,7 +47,8 @@ class Notification implements NotificationInterface {
     /**
      * Automatically determine what channels is the notification using based on recipients list.
      */
-    public function setChannelsAuto() {
+    public function setChannelsAuto()
+    {
         $recipients = $this->getRecipients();
         $channels = [];
         if (!empty($recipients['emails'])) {
@@ -65,7 +67,8 @@ class Notification implements NotificationInterface {
      * @throws PhoneNumberNotSetException
      * @throws EmailNotSetException
      */
-    public function send() {
+    public function send()
+    {
         if ($this->getChannels() === []) {
             $this->setChannelsAuto();
         }
@@ -76,8 +79,8 @@ class Notification implements NotificationInterface {
 
         $params = [
             'relatedObjectType' => $this->relatedObjectType,
-            'relatedObjectId'   => $this->relatedObjectId,
-            'toBeSentAt'        => $this->toBeSentAt
+            'relatedObjectId' => $this->relatedObjectId,
+            'toBeSentAt' => $this->toBeSentAt
         ];
 
         $this->sendEmails($viewName, $viewData, $recipients, $params);
@@ -86,12 +89,13 @@ class Notification implements NotificationInterface {
 
     /**
      * @param string $viewName
-     * @param array  $viewData
-     * @param array  $recipients
-     * @param array  $params
+     * @param array $viewData
+     * @param array $recipients
+     * @param array $params
      * @throws EmailNotSetException
      */
-    protected function sendEmails($viewName, $viewData, $recipients, $params) {
+    protected function sendEmails($viewName, $viewData, $recipients, $params)
+    {
         if (in_array(self::CHANNEL_EMAIL, $this->getChannels())) {
             if (empty($recipients['emails'])) {
                 throw new EmailNotSetException('No email addresses provided.');
@@ -119,27 +123,30 @@ class Notification implements NotificationInterface {
                 }
 
                 $data = [
-                    'recipientEmail'       => $recipientEmail,
+                    'recipientEmail' => $recipientEmail,
                     'renderedNotification' => $renderedNotification,
-                    'params'               => $params
+                    'params' => $params
                 ];
 
                 if (\Config::get('notifications::logNotificationsInDb')) {
                     $data['logId'] = \NotificationLogger::addNotification(self::CHANNEL_EMAIL, $data);
                 }
-                \Queue::push(get_class($this->emailSender), $data);
+
+                $senderClass = get_class($this->emailSender);
+                $this->putInQueue($senderClass, $data);
             }
         }
     }
 
     /**
      * @param string $viewName
-     * @param array  $viewData
-     * @param array  $recipients
-     * @param array  $params
+     * @param array $viewData
+     * @param array $recipients
+     * @param array $params
      * @throws PhoneNumberNotSetException
      */
-    protected function sendSmses($viewName, $viewData, $recipients, $params) {
+    protected function sendSmses($viewName, $viewData, $recipients, $params)
+    {
         if (in_array(self::CHANNEL_SMS, $this->getChannels())) {
             if (empty($recipients['phones'])) {
                 throw new PhoneNumberNotSetException('No recipient phone provided for the SMS channel.');
@@ -164,64 +171,90 @@ class Notification implements NotificationInterface {
                 }
 
                 $data = [
-                    'recipientPhone'       => $recipientPhone,
+                    'recipientPhone' => $recipientPhone,
                     'renderedNotification' => $renderedNotification,
-                    'params'               => $params
+                    'params' => $params
                 ];
 
                 if (\Config::get('notifications::logNotificationsInDb')) {
                     $data['logId'] = \NotificationLogger::addNotification(self::CHANNEL_SMS, $data);
                 }
-                \Queue::push(get_class($this->smsSender), $data);
+
+                $senderClass = get_class($this->smsSender);
+                $this->putInQueue($senderClass, $data);
             }
         }
     }
 
-    public function setSendTime($time) {
+    protected function putInQueue($senderClass, $data)
+    {
+        if (empty($this->toBeSentAt)) {
+            // send immediately
+            \Queue::push($senderClass, $data);
+        } else {
+            // send later
+            $date = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $this->toBeSentAt);
+            \Queue::later($date, $senderClass, $data);
+        }
+    }
+
+    public function setSendTime(\Carbon\Carbon $time = null)
+    {
         $this->toBeSentAt = $time;
     }
 
-    public function setRelatedObjectType($objectType) {
+    public function setRelatedObjectType($objectType)
+    {
         $this->relatedObjectType = $objectType;
     }
 
-    public function getRelatedObjectType() {
+    public function getRelatedObjectType()
+    {
         return $this->relatedObjectType;
     }
 
-    public function setRelatedObjectId($objectId) {
+    public function setRelatedObjectId($objectId)
+    {
         $this->relatedObjectId = $objectId;
     }
 
-    public function getRelatedObjectId() {
+    public function getRelatedObjectId()
+    {
         return $this->relatedObjectId;
     }
 
-    public function setViewData($viewData) {
+    public function setViewData($viewData)
+    {
         $this->viewData = $viewData;
     }
 
-    public function getViewData() {
+    public function getViewData()
+    {
         return $this->viewData;
     }
 
-    public function setViewName($emailViewName) {
+    public function setViewName($emailViewName)
+    {
         $this->emailViewName = $emailViewName;
     }
 
-    public function getViewName() {
+    public function getViewName()
+    {
         return $this->emailViewName;
     }
 
-    public function setSmsViewName($smsViewName) {
+    public function setSmsViewName($smsViewName)
+    {
         $this->smsViewName = $smsViewName;
     }
 
-    public function getSmsViewName() {
+    public function getSmsViewName()
+    {
         return $this->smsViewName;
     }
 
-    public function setRecipients($recipients) {
+    public function setRecipients($recipients)
+    {
         $this->recipients = [];
 
         if (!empty($recipients['emails']) && !LH::isObjectEmpty($recipients['emails'])) {
@@ -243,15 +276,18 @@ class Notification implements NotificationInterface {
     /**
      * @return array
      */
-    public function getRecipients() {
+    public function getRecipients()
+    {
         return $this->recipients;
     }
 
-    public function setChannels(array $channels) {
+    public function setChannels(array $channels)
+    {
         $this->channels = $channels;
     }
 
-    public function getChannels() {
+    public function getChannels()
+    {
         return $this->channels;
     }
 
@@ -260,7 +296,8 @@ class Notification implements NotificationInterface {
      *
      * @return mixed
      */
-    protected function sendOnlyToWhitelist() {
+    protected function sendOnlyToWhitelist()
+    {
         return \Config::get('notifications::sendOnlyToWhitelist');
     }
 }

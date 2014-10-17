@@ -1,9 +1,12 @@
 <?php namespace Levitated\Notifications;
 
 use \Mockery as m;
+use \Carbon\Carbon;
 
-class NotificationTest extends TestCase {
-    public function testSetChannelsAuto() {
+class NotificationTest extends TestCase
+{
+    public function testSetChannelsAuto()
+    {
         $renderer = $this->getMockRenderer();
 
         $n = new Notification(['emails' => ['foo@example.com']], 'bar', [], $renderer);
@@ -26,7 +29,8 @@ class NotificationTest extends TestCase {
         $this->assertCount(2, $channels);
     }
 
-    public function testSendEmail() {
+    public function testSendEmail()
+    {
         $renderer = $this->getMockRenderer();
         $sender = $this->getMockEmailSender();
 
@@ -42,7 +46,8 @@ class NotificationTest extends TestCase {
         $n->send();
     }
 
-    public function testSendSms() {
+    public function testSendSms()
+    {
         $renderer = $this->getMockRenderer();
         $sender = $this->getMockSmsSender();
 
@@ -58,7 +63,8 @@ class NotificationTest extends TestCase {
         $n->send();
     }
 
-    public function testSetRecipients() {
+    public function testSetRecipients()
+    {
         $renderer = $this->getMockRenderer();
 
         $n = new Notification([], 'bar', [], $renderer);
@@ -78,7 +84,8 @@ class NotificationTest extends TestCase {
         $this->assertContains('foo@example.com', $recipients['emails']);
     }
 
-    public function testLogging() {
+    public function testLogging()
+    {
         $renderer = $this->getMockRenderer();
         $sender = $this->getMockEmailSender();
         \Config::set('notifications::logNotificationsInDb', true);
@@ -97,4 +104,20 @@ class NotificationTest extends TestCase {
         );
         $n->send();
     }
+
+    public function testSendSentAt()
+    {
+        $renderer = $this->getMockRenderer();
+        $sender = $this->getMockSmsSender();
+
+        $sendTime = Carbon::now()->addMinutes(15);
+        \Queue::shouldReceive('later')
+            ->once();
+
+        $renderer->shouldReceive('render');
+        $n = new Notification(['phones' => ['123 123 123']], 'bar', [], $renderer, null, $sender);
+        $n->setSendTime($sendTime);
+        $n->send();
+    }
+
 }

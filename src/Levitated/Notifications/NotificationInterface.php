@@ -74,9 +74,9 @@ interface NotificationInterface {
      * Set when the notification should be sent, in server time zone.
      * If null passed (or method not called at all) it will be sent immediately.
      *
-     * @param string|null $time e.g. '2014-07-03 16:30'
+     * @param \Carbon\Carbon|null $time e.g. '2014-07-03 16:30'
      */
-    public function setSendTime($time);
+    public function setSendTime(\Carbon\Carbon $time = null);
 
     /**
      * @return string|null

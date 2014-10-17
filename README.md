@@ -142,3 +142,11 @@ And you're ready to start using the notifications:
     );
     $notification->send();
 ```
+
+If you don't want to send the notification immediately but rather postpone sending it simply call setSendTime(), e.g.:
+
+```
+    // ...
+    $notification->setSentTime(\Carbon\Carbon::now()->addMinutes(15)); // send in 15mins
+    $notification->send();
+```

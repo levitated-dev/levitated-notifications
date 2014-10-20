@@ -5,9 +5,10 @@ use Levitated\Helpers\LH;
 class TwilioNotificationSmsSender extends NotificationSender implements NotificationSmsSenderInterface {
     public function fire($job, $data) {
         try {
+            $text = substr(trim($data['renderedNotification']['bodyPlain']), 0, 160);
             \Aloha\Twilio\Facades\Twilio::message(
                 $data['recipientPhone'],
-                $data['renderedNotification']['bodyPlain']
+                $text
             );
             \Event::fire('Levitated\Notifications\Notification:smsSent', [$data]);
             $job->delete();

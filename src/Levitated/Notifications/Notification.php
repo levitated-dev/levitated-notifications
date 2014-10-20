@@ -134,7 +134,6 @@ class Notification implements NotificationInterface
 
                 $senderClass = get_class($this->emailSender);
                 $this->putInQueue($senderClass, $data);
-                \Event::fire('Levitated\Notifications\Notification:emailSent', [$data]);
             }
         }
     }
@@ -183,7 +182,6 @@ class Notification implements NotificationInterface
 
                 $senderClass = get_class($this->smsSender);
                 $this->putInQueue($senderClass, $data);
-                \Event::fire('Levitated\Notifications\Notification:smsSent', [$data]);
             }
         }
     }

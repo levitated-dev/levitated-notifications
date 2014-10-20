@@ -14,6 +14,7 @@ class SesNotificationEmailSender extends NotificationSender implements Notificat
         $ses = \App::make('aws')->get('ses');
         try {
             $ses->sendEmail($email);
+            \Event::fire('Levitated\Notifications\Notification:emailSent', [$data]);
             $job->delete();
         } catch (\Exception $e) {
             $this->handleFailedJob($e, $job, $data);

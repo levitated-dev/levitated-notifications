@@ -9,6 +9,7 @@ class TwilioNotificationSmsSender extends NotificationSender implements Notifica
                 $data['recipientPhone'],
                 $data['renderedNotification']['bodyPlain']
             );
+            \Event::fire('Levitated\Notifications\Notification:smsSent', [$data]);
             $job->delete();
         } catch (\Exception $e) {
             $this->handleFailedJob($e, $job, $data);

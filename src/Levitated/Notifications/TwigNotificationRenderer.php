@@ -15,18 +15,22 @@ class TwigNotificationRenderer implements NotificationRendererInterface {
     }
 
     protected function renderEmail($viewName, $data, $params = []) {
-        $htmlTemplate = LH::getVal($params, 'emailTemplate', 'notifications::notifications/layouts/html.twig');
+        $subjectTemplate = LH::getVal($params, 'emailSubjectTemplate', 'notifications/layouts/subject.twig');
+        $htmlTemplate = LH::getVal($params, 'emailHtmlTemplate', 'notifications/layouts/html.twig');
+        $plainTemplate = LH::getVal($params, 'emailPlainTemplate', 'notifications/layouts/plain.twig');
 
         return [
-            'subject'   => \Twig::render($viewName, $data + array('emailTemplate' => 'notifications::notifications/layouts/subject.twig')),
+            'subject' => \Twig::render($viewName, $data + array('emailTemplate' => $subjectTemplate)),
             'bodyHtml'  => \Twig::render($viewName, $data + array('emailTemplate' => $htmlTemplate)),
-            'bodyPlain' => \Twig::render($viewName, $data + array('emailTemplate' => 'notifications::notifications/layouts/plain.twig'))
+            'bodyPlain' => \Twig::render($viewName, $data + array('emailTemplate' => $plainTemplate))
         ];
     }
 
-    protected function renderSms($viewName, $data) {
+    protected function renderSms($viewName, $data, $params = [])
+    {
+        $plainTemplate = LH::getVal($params, 'emailPlainTemplate', 'notifications/layouts/plain.twig');
         return [
-            'bodyPlain' => \Twig::render($viewName, $data + array('emailTemplate' => 'notifications::notifications/layouts/plain.twig'))
+            'bodyPlain' => \Twig::render($viewName, $data + array('emailTemplate' => $plainTemplate))
         ];
     }
 }

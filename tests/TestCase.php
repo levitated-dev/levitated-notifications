@@ -24,6 +24,7 @@ class TestCase extends \Illuminate\Foundation\Testing\TestCase {
         parent::setUp();
         $this->setUpDb();
 
+        \Config::set('notifications::logNotificationsInDb', true);
         \Config::set('notifications::maxAttempts', 5);
         \Config::set('notifications::retryTimes', [1, 2, 5, 10]);
 

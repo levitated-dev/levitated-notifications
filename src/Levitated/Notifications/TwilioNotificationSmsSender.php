@@ -4,14 +4,16 @@ use Levitated\Helpers\LH;
 
 class TwilioNotificationSmsSender extends NotificationSender implements NotificationSmsSenderInterface {
     public function fire($job, $data) {
+        $this->setState($job, $data, self::STATE_SENDING);
         try {
             $text = substr(trim($data['renderedNotification']['bodyPlain']), 0, 160);
             \Aloha\Twilio\Facades\Twilio::message(
                 $data['recipientPhone'],
                 $text
             );
-            \Event::fire('Levitated\Notifications\Notification:smsSent', [$data]);
             $job->delete();
+            $this->setState($job, $data, self::STATE_SENT);
+            \Event::fire('Levitated\Notifications\Notification:smsSent', [$data]);
         } catch (\Exception $e) {
             $this->handleFailedJob($e, $job, $data);
         }

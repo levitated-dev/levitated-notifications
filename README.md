@@ -130,7 +130,7 @@ and run the queue daemon [as described in the Laravel docs](http://laravel.com/d
 And you're ready to start using the notifications:
 
 ```
-    $notifiction = new Levitated\Notifications\Notification(
+    $notification = new Levitated\Notifications\Notification(
         [
             'phones' => ['+48 123123123'],
             'emails' => ['jan@levitated.pl']

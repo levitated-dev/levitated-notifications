@@ -21,7 +21,7 @@ class NotificationLogger extends \Eloquent
     /**
      * @param string $channel
      * @param array $data
-     * @return int
+     * @return NotificationLogger
      */
     public function addNotification($channel, $data) {
         switch ($channel) {
@@ -44,7 +44,7 @@ class NotificationLogger extends \Eloquent
             $this->fill($data['renderedNotification']);
         }
         $this->save();
-        return $this->id;
+        return $this;
     }
 
     public function getParams()

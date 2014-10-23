@@ -205,9 +205,11 @@ class Notification implements NotificationInterface
     {
         // add DB log entry
         if (\Config::get('notifications::logNotificationsInDb')) {
-            $data['logId'] = \NotificationLogger::addNotification($channel, $data);
+            $logEntry = \NotificationLogger::addNotification($channel, $data);
+            $data['logId'] = $logEntry->id;
         }
 
+        // put in the queue
         $senderClass = $this->getSenderClassName($channel);
         if (empty($this->toBeSentAt)) {
             // send immediately
@@ -216,6 +218,12 @@ class Notification implements NotificationInterface
             // send later
             $date = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $this->toBeSentAt);
             $jobId = \Queue::later($date, $senderClass, $data);
+        }
+
+        // update DB entry with queue job id
+        if (\Config::get('notifications::logNotificationsInDb')) {
+            $logEntry->jobId = $jobId;
+            $logEntry->save();
         }
     }
 

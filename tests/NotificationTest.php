@@ -89,8 +89,20 @@ class NotificationTest extends TestCase
         $renderer = $this->getMockRenderer();
         $sender = $this->getMockEmailSender();
         \Config::set('notifications::logNotificationsInDb', true);
+
+        $logEntry = m::mock('\Levitated\Notifications\NotificationLogged');
+        $logEntry->id = 123;
+        $logEntry->shouldReceive('save');
+
         \NotificationLogger::shouldReceive('addNotification')
-            ->times(3);
+            ->times(3)
+            ->andReturn($logEntry);
+
+        // TODO: put jobId reference to another test
+        \Queue::shouldReceive('push')
+            ->times(3)
+            ->andReturn('exampleJobId');
+
         $renderer->shouldReceive('render');
         $n = new Notification(
             [
@@ -119,5 +131,4 @@ class NotificationTest extends TestCase
         $n->setSendTime($sendTime);
         $n->send();
     }
-
 }

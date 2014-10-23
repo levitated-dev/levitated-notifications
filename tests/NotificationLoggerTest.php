@@ -1,19 +1,20 @@
 <?php namespace Levitated\Notifications;
 
-class NotificationLoggerTest extends TestCase {
-    public function testAddEmailNotification() {
+class NotificationLoggerTest extends TestCase
+{
+    public function testAddEmailNotification()
+    {
         $data = [
-            'recipientEmail'       => 'foo@example.com',
+            'recipientEmail' => 'foo@example.com',
             'renderedNotification' => [
-                'subject'   => 'foo',
+                'subject' => 'foo',
                 'bodyPlain' => 'bar',
-                'bodyHtml'  => 'foobar'
+                'bodyHtml' => 'foobar'
             ],
-            'params'               => ['param' => 'test']
+            'params' => ['param' => 'test']
         ];
 
-        $notificationId = \NotificationLogger::addNotification(NotificationInterface::CHANNEL_EMAIL, $data);
-        $logEntry = \NotificationLogger::findOrFail($notificationId);
+        $logEntry = \NotificationLogger::addNotification(NotificationInterface::CHANNEL_EMAIL, $data);
 
         $this->assertSame('foo@example.com', $logEntry->recipientEmail);
         $this->assertSame(['param' => 'test'], $logEntry->getParams());

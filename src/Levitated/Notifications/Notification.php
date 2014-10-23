@@ -96,47 +96,44 @@ class Notification implements NotificationInterface
      */
     protected function sendEmails($viewName, $viewData, $recipients, $params)
     {
-        if (in_array(self::CHANNEL_EMAIL, $this->getChannels())) {
-            if (empty($recipients['emails'])) {
-                throw new EmailNotSetException('No email addresses provided.');
-            }
+        if (!in_array(self::CHANNEL_EMAIL, $this->getChannels())) {
+            return;
+        }
+        if (empty($recipients['emails'])) {
+            throw new EmailNotSetException('No email addresses provided.');
+        }
 
-            if (!is_array($recipients['emails'])) {
-                $recipients['emails'] = [$recipients['emails']];
-            }
+        if (!is_array($recipients['emails'])) {
+            $recipients['emails'] = [$recipients['emails']];
+        }
 
-            $renderedNotification = $this->renderer->render(
-                NotificationRendererInterface::EMAIL,
-                $viewName,
-                $viewData,
-                $params
-            );
+        $renderedNotification = $this->renderer->render(
+            NotificationRendererInterface::EMAIL,
+            $viewName,
+            $viewData,
+            $params
+        );
 
-            foreach ($recipients['emails'] as $recipientEmail) {
-                if ($this->sendOnlyToWhitelist()) {
-                    // skip emails not matching regexes on the white list
-                    foreach (\Config::get('notifications::emailsWhiteList') as $emailRegex) {
-                        if (!preg_match($emailRegex, $recipientEmail)) {
-                            continue;
-                        }
+        foreach ($recipients['emails'] as $recipientEmail) {
+            if ($this->sendOnlyToWhitelist()) {
+                // skip emails not matching regexes on the white list
+                foreach (\Config::get('notifications::emailsWhiteList') as $emailRegex) {
+                    if (!preg_match($emailRegex, $recipientEmail)) {
+                        continue;
                     }
                 }
-
-                $data = [
-                    'recipientEmail' => $recipientEmail,
-                    'renderedNotification' => $renderedNotification,
-                    'params' => $params
-                ];
-
-                if (\Config::get('notifications::logNotificationsInDb')) {
-                    $data['logId'] = \NotificationLogger::addNotification(self::CHANNEL_EMAIL, $data);
-                }
-
-                $senderClass = get_class($this->emailSender);
-                $this->putInQueue($senderClass, $data);
             }
+
+            $data = [
+                'recipientEmail' => $recipientEmail,
+                'renderedNotification' => $renderedNotification,
+                'params' => $params
+            ];
+
+            $this->putInQueue(self::CHANNEL_EMAIL, $data);
         }
     }
+
 
     /**
      * @param string $viewName
@@ -147,54 +144,78 @@ class Notification implements NotificationInterface
      */
     protected function sendSmses($viewName, $viewData, $recipients, $params)
     {
-        if (in_array(self::CHANNEL_SMS, $this->getChannels())) {
-            if (empty($recipients['phones'])) {
-                throw new PhoneNumberNotSetException('No recipient phone provided for the SMS channel.');
-            }
+        if (!in_array(self::CHANNEL_SMS, $this->getChannels())) {
+            return;
+        }
+        if (empty($recipients['phones'])) {
+            throw new PhoneNumberNotSetException('No recipient phone provided for the SMS channel.');
+        }
 
-            if (!is_array($recipients['phones'])) {
-                $recipients['phones'] = [$recipients['phones']];
-            }
+        if (!is_array($recipients['phones'])) {
+            $recipients['phones'] = [$recipients['phones']];
+        }
 
-            $renderedNotification = $this->renderer->render(
-                NotificationRendererInterface::SMS,
-                $viewName,
-                $viewData,
-                $params
-            );
+        $renderedNotification = $this->renderer->render(
+            NotificationRendererInterface::SMS,
+            $viewName,
+            $viewData,
+            $params
+        );
 
-            foreach ($recipients['phones'] as $recipientPhone) {
-                if (self::sendOnlyToWhitelist()) {
-                    if (!in_array($recipientPhone, \Config::get('notifications::phoneNumberWhiteList'))) {
-                        continue;
-                    }
+        foreach ($recipients['phones'] as $recipientPhone) {
+            if (self::sendOnlyToWhitelist()) {
+                if (!in_array($recipientPhone, \Config::get('notifications::phoneNumberWhiteList'))) {
+                    continue;
                 }
-
-                $data = [
-                    'recipientPhone' => $recipientPhone,
-                    'renderedNotification' => $renderedNotification,
-                    'params' => $params
-                ];
-
-                if (\Config::get('notifications::logNotificationsInDb')) {
-                    $data['logId'] = \NotificationLogger::addNotification(self::CHANNEL_SMS, $data);
-                }
-
-                $senderClass = get_class($this->smsSender);
-                $this->putInQueue($senderClass, $data);
             }
+
+            $data = [
+                'recipientPhone' => $recipientPhone,
+                'renderedNotification' => $renderedNotification,
+                'params' => $params
+            ];
+
+            $this->putInQueue(self::CHANNEL_SMS, $data);
         }
     }
 
-    protected function putInQueue($senderClass, $data)
+    /**
+     * @param string $channel
+     * @return string
+     */
+    protected function getSenderClassName($channel)
     {
+        switch ($channel) {
+            case self::CHANNEL_SMS:
+                $senderClass = $this->smsSender;
+                break;
+
+            case self::CHANNEL_EMAIL:
+                $senderClass = $this->emailSender;
+                break;
+        }
+        return get_class($senderClass);
+    }
+
+    /**
+     * @param string $channel
+     * @param array $data
+     */
+    protected function putInQueue($channel, $data)
+    {
+        // add DB log entry
+        if (\Config::get('notifications::logNotificationsInDb')) {
+            $data['logId'] = \NotificationLogger::addNotification($channel, $data);
+        }
+
+        $senderClass = $this->getSenderClassName($channel);
         if (empty($this->toBeSentAt)) {
             // send immediately
-            \Queue::push($senderClass, $data);
+            $jobId = \Queue::push($senderClass, $data);
         } else {
             // send later
             $date = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $this->toBeSentAt);
-            \Queue::later($date, $senderClass, $data);
+            $jobId = \Queue::later($date, $senderClass, $data);
         }
     }
 

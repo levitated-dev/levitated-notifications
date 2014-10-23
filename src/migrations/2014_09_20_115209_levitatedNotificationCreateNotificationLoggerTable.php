@@ -43,6 +43,7 @@ class LevitatedNotificationCreateNotificationLoggerTable extends Migration
                 )->default(\Levitated\Notifications\NotificationSender::STATE_QUEUED);
                 $table->integer('numAttempts')->unsigned()->default(0);
                 $table->text('errorMessage')->nullable();
+                $table->string('jobId', 32)->nullable();
             }
         );
     }

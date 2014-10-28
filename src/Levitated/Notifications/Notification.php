@@ -127,7 +127,7 @@ class Notification implements NotificationInterface
             $data = [
                 'recipientEmail' => $recipientEmail,
                 'renderedNotification' => $renderedNotification,
-                'params' => $params
+                'params' => $params,
             ];
 
             $this->putInQueue(self::CHANNEL_EMAIL, $data);

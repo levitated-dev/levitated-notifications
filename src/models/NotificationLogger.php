@@ -18,12 +18,21 @@ class NotificationLogger extends \Eloquent
         }
     }
 
+    protected function setAttributeAndUnsetParam($name, &$params)
+    {
+        if (isset($params[$name])) {
+            $this->{$name} = $params[$name];
+            unset($params[$name]);
+        }
+    }
+
     /**
      * @param string $channel
      * @param array $data
      * @return NotificationLogger
      */
-    public function addNotification($channel, $data) {
+    public function addNotification($channel, $data)
+    {
         switch ($channel) {
             case NotificationInterface::CHANNEL_EMAIL:
                 $this->fillEmailData($data);
@@ -39,7 +48,11 @@ class NotificationLogger extends \Eloquent
         }
 
         $this->channel = $channel;
-        $this->params = json_encode(LH::getVal('params', $data, []));
+        $params = LH::getVal('params', $data, []);
+        $this->setAttributeAndUnsetParam('relatedObjectId', $params);
+        $this->setAttributeAndUnsetParam('relatedObjectType', $params);
+        $this->setAttributeAndUnsetParam('toBeSentAt', $params);
+        $this->params = json_encode($params);
         if ($data['renderedNotification']) {
             $this->fill($data['renderedNotification']);
         }
@@ -55,14 +68,16 @@ class NotificationLogger extends \Eloquent
     /**
      * @param array $data
      */
-    protected function fillEmailData($data) {
+    protected function fillEmailData($data)
+    {
         $this->recipientEmail = $data['recipientEmail'];
     }
 
     /**
      * @param array $data
      */
-    protected function fillSmsData($data) {
+    protected function fillSmsData($data)
+    {
         $this->recipientPhone = $data['recipientPhone'];
     }
 }

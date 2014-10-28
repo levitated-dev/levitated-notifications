@@ -11,13 +11,21 @@ class NotificationLoggerTest extends TestCase
                 'bodyPlain' => 'bar',
                 'bodyHtml' => 'foobar'
             ],
-            'params' => ['param' => 'test']
+            'params' => [
+                'param' => 'test',
+                'relatedObjectId' => 123,
+                'relatedObjectType' => 'fooType',
+                'toBeSentAt' => '2014-10-28 14:01'
+            ]
         ];
 
         $logEntry = \NotificationLogger::addNotification(NotificationInterface::CHANNEL_EMAIL, $data);
 
         $this->assertSame('foo@example.com', $logEntry->recipientEmail);
         $this->assertSame(['param' => 'test'], $logEntry->getParams());
+        $this->assertSame('2014-10-28 14:01', $logEntry->toBeSentAt);
+        $this->assertSame(123, $logEntry->relatedObjectId);
+        $this->assertSame('fooType', $logEntry->relatedObjectType);
         $this->assertSame('foo', $logEntry->subject);
         $this->assertSame('bar', $logEntry->bodyPlain);
         $this->assertSame('foobar', $logEntry->bodyHtml);

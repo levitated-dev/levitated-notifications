@@ -44,6 +44,9 @@ class LevitatedNotificationCreateNotificationLoggerTable extends Migration
                 $table->integer('numAttempts')->unsigned()->default(0);
                 $table->text('errorMessage')->nullable();
                 $table->string('jobId', 32)->nullable();
+                $table->integer('relatedObjectId')->nullable();
+                $table->timestamp('toBeSentAt')->nullable();
+                $table->string('relatedObjectType', 32)->nullable();
             }
         );
     }

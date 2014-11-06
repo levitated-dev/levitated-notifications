@@ -2,7 +2,8 @@
 
 use Illuminate\Support\ServiceProvider;
 
-class NotificationsServiceProvider extends ServiceProvider {
+class NotificationsServiceProvider extends ServiceProvider
+{
     /**
      * Indicates if loading of the provider is deferred.
      *
@@ -10,7 +11,8 @@ class NotificationsServiceProvider extends ServiceProvider {
      */
     protected $defer = false;
 
-    public function boot() {
+    public function boot()
+    {
         $this->package('levitated/notifications');
     }
 
@@ -19,35 +21,47 @@ class NotificationsServiceProvider extends ServiceProvider {
      *
      * @return void
      */
-    public function register() {
+    public function register()
+    {
         $this->app->register('Aws\Laravel\AwsServiceProvider');
         $this->app->register('Barryvdh\TwigBridge\ServiceProvider');
-        $this->app->register('Aloha\Twilio\TwilioServiceProvider');
 
         $loader = \Illuminate\Foundation\AliasLoader::getInstance();
         $loader->alias('Twig', 'Barryvdh\TwigBridge\Twig');
         $loader->alias('AWS', 'Aws\Laravel\AwsFacade');
         $loader->alias('NotificationLogger', 'Levitated\Notifications\Facades\NotificationLogger');
 
-        $this->app->bind('NotificationRenderer', function ($app) {
-            $rendererClassName = \Config::get('notifications::rendererClassName');
-            return new $rendererClassName;
-        });
+        $this->app->bind(
+            'NotificationRenderer',
+            function ($app) {
+                $rendererClassName = \Config::get('notifications::rendererClassName');
+                return new $rendererClassName;
+            }
+        );
 
-        $this->app->bind('NotificationEmailSender', function ($app) {
-            $senderClassName = \Config::get('notifications::emailSenderClassName');
+        $this->app->bind(
+            'NotificationEmailSender',
+            function ($app) {
+                $senderClassName = \Config::get('notifications::emailSenderClassName');
 
-            return new $senderClassName;
-        });
+                return new $senderClassName;
+            }
+        );
 
-        $this->app->bind('NotificationSmsSender', function ($app) {
-            $senderClassName = \Config::get('notifications::smsSenderClassName');
+        $this->app->bind(
+            'NotificationSmsSender',
+            function ($app) {
+                $senderClassName = \Config::get('notifications::smsSenderClassName');
 
-            return new $senderClassName;
-        });
+                return new $senderClassName;
+            }
+        );
 
-        $this->app->bind('notificationLogger', function ($app) {
-            return new NotificationLogger;
-        });
+        $this->app->bind(
+            'notificationLogger',
+            function ($app) {
+                return new NotificationLogger;
+            }
+        );
     }
 }

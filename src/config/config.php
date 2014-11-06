@@ -5,8 +5,15 @@ return [
     'emailSenderClassName' => 'Levitated\Notifications\SesNotificationEmailSender',
     'smsSenderClassName' => 'Levitated\Notifications\TwilioNotificationSmsSender',
 
+
+    // Email config
     // fill with a verified SES sender
     'emailFrom' => 'Name <name@example.com>',
+
+    // SMS config
+    'twilioSid'=> '',
+    'twilioToken' => '',
+    'twilioFrom' => '',
 
     // number of sending tried before giving up.
     'maxAttempts' => 8,

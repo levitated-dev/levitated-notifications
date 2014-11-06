@@ -7,7 +7,10 @@ class TwilioNotificationSmsSender extends NotificationSender implements Notifica
         $this->setState($job, $data, self::STATE_SENDING);
         try {
             $text = substr(trim($data['renderedNotification']['bodyPlain']), 0, 160);
-            \Aloha\Twilio\Facades\Twilio::message(
+
+            $twilio = new \Services_Twilio(\Config::get('notifications::twilioSid'), \Config::get('notifications::twilioToken'));
+            $twilio->account->messages->sendMessage(
+                \Config::get('notifications::twilioFrom'),
                 $data['recipientPhone'],
                 $text
             );

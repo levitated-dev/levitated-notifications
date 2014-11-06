@@ -13,7 +13,8 @@
         "aws/aws-sdk-php-laravel": "1.*",
         "barryvdh/laravel-twigbridge": "*",
         "erusev/parsedown": "*",
-        "levitated/helpers": "1.0.*"
+        "levitated/helpers": "1.0.*",
+        "twilio/sdk": "3.12.*"
     },
     "require-dev": {
     "mockery/mockery": "dev-master@dev",

@@ -28,7 +28,7 @@ class TwigNotificationRenderer implements NotificationRendererInterface {
 
     protected function renderSms($viewName, $data, $params = [])
     {
-        $plainTemplate = LH::getVal($params, 'emailPlainTemplate', 'notifications/layouts/plain.twig');
+        $plainTemplate = LH::getVal($params, 'smsPlainTemplate', 'notifications/layouts/sms.twig');
         return [
             'bodyPlain' => \Twig::render($viewName, $data + array('emailTemplate' => $plainTemplate))
         ];

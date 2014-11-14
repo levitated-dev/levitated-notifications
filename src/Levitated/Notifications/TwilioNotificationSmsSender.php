@@ -8,12 +8,14 @@ class TwilioNotificationSmsSender extends NotificationSender implements Notifica
         try {
             $text = substr(trim($data['renderedNotification']['bodyPlain']), 0, 160);
 
-            $twilio = new \Services_Twilio(\Config::get('notifications::twilioSid'), \Config::get('notifications::twilioToken'));
-            $twilio->account->messages->sendMessage(
-                \Config::get('notifications::twilioFrom'),
-                $data['recipientPhone'],
-                $text
-            );
+            if (!$this->getSimulateSending()) {
+                $twilio = new \Services_Twilio(\Config::get('notifications::twilioSid'), \Config::get('notifications::twilioToken'));
+                $twilio->account->messages->sendMessage(
+                    \Config::get('notifications::twilioFrom'),
+                    $data['recipientPhone'],
+                    $text
+                );
+            }
             $job->delete();
             $this->setState($job, $data, self::STATE_SENT);
             \Event::fire('Levitated\Notifications\Notification:smsSent', [$data]);

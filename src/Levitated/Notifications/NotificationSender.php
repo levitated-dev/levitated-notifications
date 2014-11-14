@@ -88,4 +88,9 @@ abstract class NotificationSender
             \Log::warning(static::getSenderName() . ': setState' . $e->getMessage(), static::getErrorLogData($data));
         }
     }
+
+    public function getSimulateSending()
+    {
+        return (bool)\Config::get('notifications::simulateSending');
+    }
 }

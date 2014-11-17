@@ -63,5 +63,19 @@ class NotificationsServiceProvider extends ServiceProvider
                 return new NotificationLogger;
             }
         );
+
+        $this->app->bind(
+            'levitated::command.notifications.gc',
+            function ($app) {
+                return new GcCommand();
+            }
+        );
+
+        $this->commands(
+            array(
+                'levitated::command.notifications.gc'
+            )
+        );
+
     }
 }

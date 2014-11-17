@@ -60,6 +60,15 @@ class NotificationLogger extends \Eloquent
         return $this;
     }
 
+    public static function gc($params = [])
+    {
+        $date = new \DateTime;
+        $date->modify('-1 day');
+        $formatted_date = $date->format('Y-m-d H:i:s');
+        return self::where('state', NotificationSender::STATE_SENT)->where('createdAt', '<=', $formatted_date)->delete(
+        );
+    }
+
     public function getParams()
     {
         return (array)json_decode($this->params, true);

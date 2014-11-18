@@ -51,7 +51,12 @@ class NotificationLogger extends \Eloquent
         $params = LH::getVal('params', $data, []);
         $this->setAttributeAndUnsetParam('relatedObjectId', $params);
         $this->setAttributeAndUnsetParam('relatedObjectType', $params);
-        $this->setAttributeAndUnsetParam('toBeSentAt', $params);
+
+        // if there's a send date set, convert it to string and remove from params to avoid redundancy
+        if (!empty($params['toBeSentAt']) && $params['toBeSentAt'] instanceof \Carbon\Carbon) {
+            $this->toBeSentAt = $params['toBeSentAt']->copy()->format('Y-m-d H:i:s');
+            unset($params['toBeSentAt']);
+        }
         $this->params = json_encode($params);
         if ($data['renderedNotification']) {
             $this->fill($data['renderedNotification']);

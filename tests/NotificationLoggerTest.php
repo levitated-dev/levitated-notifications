@@ -15,7 +15,7 @@ class NotificationLoggerTest extends TestCase
                 'param' => 'test',
                 'relatedObjectId' => 123,
                 'relatedObjectType' => 'fooType',
-                'toBeSentAt' => '2014-10-28 14:01'
+                'toBeSentAt' => \Carbon\Carbon::create(2014, 10, 28, 14, 1, 30)
             ]
         ];
 
@@ -23,7 +23,7 @@ class NotificationLoggerTest extends TestCase
 
         $this->assertSame('foo@example.com', $logEntry->recipientEmail);
         $this->assertSame(['param' => 'test'], $logEntry->getParams());
-        $this->assertSame('2014-10-28 14:01', $logEntry->toBeSentAt);
+        $this->assertSame('2014-10-28 14:01:30', $logEntry->toBeSentAt);
         $this->assertSame(123, $logEntry->relatedObjectId);
         $this->assertSame('fooType', $logEntry->relatedObjectType);
         $this->assertSame('foo', $logEntry->subject);

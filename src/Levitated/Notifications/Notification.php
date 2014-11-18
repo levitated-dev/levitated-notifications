@@ -216,8 +216,8 @@ class Notification implements NotificationInterface
             $jobId = \Queue::push($senderClass, $data);
         } else {
             // send later
-            $date = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $this->toBeSentAt);
-            $jobId = \Queue::later($date, $senderClass, $data);
+            //$date = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $this->toBeSentAt);
+            $jobId = \Queue::later($this->toBeSentAt, $senderClass, $data);
         }
 
         // update DB entry with queue job id

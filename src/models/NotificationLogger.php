@@ -44,6 +44,7 @@ class NotificationLogger extends \Eloquent
 
             default:
                 \Log::warning('Unsupported notification channel to log', array('channel' => $channel));
+                // todo: throw, handle in client code
                 return;
         }
 
@@ -68,10 +69,9 @@ class NotificationLogger extends \Eloquent
     public static function gc($params = [])
     {
         $date = new \DateTime;
-        $date->modify('-1 day');
+        $date->modify(LH::getVal('removeOlderThan', $params, '-5 days'));
         $formatted_date = $date->format('Y-m-d H:i:s');
-        return self::where('state', NotificationSender::STATE_SENT)->where('createdAt', '<=', $formatted_date)->delete(
-        );
+        return self::where('state', NotificationSender::STATE_SENT)->where('createdAt', '<=', $formatted_date)->delete();
     }
 
     public function getParams()

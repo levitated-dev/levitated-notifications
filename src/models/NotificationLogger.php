@@ -2,6 +2,10 @@
 
 use \Levitated\Helpers\LH;
 
+class NotificationNotCancellableException extends \Exception
+{
+}
+
 class NotificationLogger extends \Eloquent
 {
     protected $table = 'notificationsLog';
@@ -94,5 +98,34 @@ class NotificationLogger extends \Eloquent
     protected function fillSmsData($data)
     {
         $this->recipientPhone = $data['recipientPhone'];
+    }
+
+    /**
+     * Cancel a queued notification.
+     *
+     * @throws NotificationNotCancellableException
+     */
+    public function cancelNotification()
+    {
+        if (in_array($this->state, [NotificationSender::STATE_SENT, NotificationSender::STATE_SENDING])) {
+            throw new NotificationNotCancellableException('This notification is either sent or is being sent.');
+        }
+
+        if (empty($this->jobId)) {
+            // this will happen when using the sync queue driver
+            throw new NotificationNotCancellableException('JobId not set.');
+        }
+
+        if (\Queue::getDefaultDriver() != 'redis') {
+            throw new NotificationNotCancellableException('Job deletion is supported only in Redis queue.');
+        }
+
+        $redis = \Queue::getRedis();
+        // WARNING: RedisQueue::getQueue is protected so for now I'm hardcoding the queue name. If the underlying implementation
+        // change this should be caught by unit tests
+        $queueName = 'queues:default:delayed';
+        $redis->zrem($queueName, $this->jobId);
+
+        $this->delete();
     }
 }

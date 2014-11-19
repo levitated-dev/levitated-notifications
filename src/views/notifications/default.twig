@@ -7,9 +7,6 @@
     {{ content|default('') }}
 {% endblock %}
 
-{% block plain %}
-    Message:
-    {{ content|default('') }}
-{% endblock %}
+{% block plain %}{{ content|default('') }}{% endblock %}
 
 {% block sms %}{{ content|default('') }}{% endblock %}

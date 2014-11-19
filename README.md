@@ -69,9 +69,12 @@ In ```config/app.php``` add service provider:
 
 Run ```composer update```
 
-Then run the migration:
+Then run:
 
-```php artisan migrate --package=levitated/notifications```
+```
+php artisan migrate --package=levitated/notifications
+php artisan view:publish levitated/notifications
+```
 
 ## Configuration
 

@@ -31,15 +31,16 @@ class NotificationLogger extends \Eloquent
      * @param array $data
      * @return NotificationLogger
      */
-    public function addNotification($channel, $data)
+    public static function addNotification($channel, $data)
     {
+        $entry = new self;
         switch ($channel) {
             case NotificationInterface::CHANNEL_EMAIL:
-                $this->fillEmailData($data);
+                $entry->fillEmailData($data);
                 break;
 
             case NotificationInterface::CHANNEL_SMS:
-                $this->fillSmsData($data);
+                $entry->fillSmsData($data);
                 break;
 
             default:
@@ -48,22 +49,22 @@ class NotificationLogger extends \Eloquent
                 return;
         }
 
-        $this->channel = $channel;
+        $entry->channel = $channel;
         $params = LH::getVal('params', $data, []);
-        $this->setAttributeAndUnsetParam('relatedObjectId', $params);
-        $this->setAttributeAndUnsetParam('relatedObjectType', $params);
+        $entry->setAttributeAndUnsetParam('relatedObjectId', $params);
+        $entry->setAttributeAndUnsetParam('relatedObjectType', $params);
 
         // if there's a send date set, convert it to string and remove from params to avoid redundancy
         if (!empty($params['toBeSentAt']) && $params['toBeSentAt'] instanceof \Carbon\Carbon) {
-            $this->toBeSentAt = $params['toBeSentAt']->copy()->format('Y-m-d H:i:s');
+            $entry->toBeSentAt = $params['toBeSentAt']->copy()->format('Y-m-d H:i:s');
             unset($params['toBeSentAt']);
         }
-        $this->params = json_encode($params);
+        $entry->params = json_encode($params);
         if ($data['renderedNotification']) {
-            $this->fill($data['renderedNotification']);
+            $entry->fill($data['renderedNotification']);
         }
-        $this->save();
-        return $this;
+        $entry->save();
+        return $entry;
     }
 
     public static function gc($params = [])

@@ -90,7 +90,7 @@ class NotificationTest extends TestCase
         $sender = $this->getMockEmailSender();
         \Config::set('notifications::logNotificationsInDb', true);
 
-        $logEntry = m::mock('\Levitated\Notifications\NotificationLogged');
+        $logEntry = m::mock('\Levitated\Notifications\NotificationLogger');
         $logEntry->id = 123;
         $logEntry->shouldReceive('save');
 

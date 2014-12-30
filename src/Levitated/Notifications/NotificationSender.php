@@ -14,8 +14,18 @@ abstract class NotificationSender
     /**
      * @param \Illuminate\Queue\Jobs\Job $job
      * @param  array $data
+     * @return bool if false the job should be not processed
      */
-    abstract function fire($job, $data);
+    public function fire($job, $data)
+    {
+        $logEntry = $this->getLogEntry($data);
+        if ($logEntry && $logEntry->state == self::STATE_DELETED) {
+            // job marked as deleted, simply skip it. More info in NotificationLogger::cancelNotification()
+            $job->delete();
+            return false;
+        }
+        return true;
+    }
 
     /**
      * Get sender name (preferably class name without namespace to avoid log spamming)
@@ -68,26 +78,35 @@ abstract class NotificationSender
      * @param \Illuminate\Queue\Jobs\Job $job
      * @param array $data
      * @param string $state
+     * @throws Exception
      */
     public function setState($job, $data, $state)
     {
-        if (!\Config::get('notifications::logNotificationsInDb') || empty($data['logId'])) {
-            return;
-        }
-        $logId = $data['logId'];
-
         try {
-            $logEntry = \NotificationLogger::find($logId);
+            $logEntry = $this->getLogEntry($data);
+            if ($logEntry === null) {
+                throw new \Exception('Log entry does not exist.');
+            }
             $logEntry->state = $state;
             $logEntry->numAttempts = $job->attempts();
-            if ($state = self::STATE_FAILED) {
+            if ($state == self::STATE_FAILED) {
                 $logEntry->errorMessage = json_encode(static::getErrorLogData($data));
             }
 
             $logEntry->save();
         } catch (\Exception $e) {
-            \Log::warning(static::getSenderName() . ': setState' . $e->getMessage(), static::getErrorLogData($data));
+            \Log::warning(static::getSenderName() . ': setState ' . $e->getMessage(), static::getErrorLogData($data));
         }
+    }
+
+    protected function getLogEntry($data)
+    {
+        if (!\Config::get('notifications::logNotificationsInDb') || empty($data['logId'])) {
+            return null;
+        }
+        $logId = $data['logId'];
+        $logEntry = \NotificationLogger::find($logId);
+        return $logEntry;
     }
 
     public function getSimulateSending()

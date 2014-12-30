@@ -6,10 +6,15 @@ class SesNotificationEmailSender extends NotificationSender implements Notificat
 
     /**
      * @param \Illuminate\Queue\Jobs\Job $job
-     * @param array                      $data
+     * @param array $data
+     * @return bool|void
      * @throws \Exception
      */
     public function fire($job, $data) {
+        if (!parent::fire($job, $data)) {
+            return;
+        }
+
         $email = $this->getSESParams($data);
         $ses = \App::make('aws')->get('ses');
         $this->setState($job, $data, self::STATE_SENDING);

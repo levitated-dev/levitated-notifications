@@ -4,6 +4,10 @@ use Levitated\Helpers\LH;
 
 class TwilioNotificationSmsSender extends NotificationSender implements NotificationSmsSenderInterface {
     public function fire($job, $data) {
+        if (!parent::fire($job, $data)) {
+            return;
+        }
+
         $this->setState($job, $data, self::STATE_SENDING);
         try {
             $text = substr(trim($data['renderedNotification']['bodyPlain']), 0, 160);

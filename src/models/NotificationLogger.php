@@ -116,16 +116,20 @@ class NotificationLogger extends \Eloquent
             throw new NotificationNotCancellableException('JobId not set.');
         }
 
-        if (\Queue::getDefaultDriver() != 'redis') {
-            throw new NotificationNotCancellableException('Job deletion is supported only in Redis queue.');
+        // NOTE: because laravel's queue doesn't directly support deleting we're using a hack and simply check before sending
+        // if the log entry connected to given job has been marked as deleted. It's not the best way to go as it requires
+        // having logging on in order to cancel notifications. Once laravel start support deletion this will be done properly.
+        $this->state = NotificationSender::STATE_DELETED;
+        $this->save();
+    }
+
+    public function getRecipient()
+    {
+        switch ($this->channel) {
+            case NotificationInterface::CHANNEL_EMAIL:
+                return $this->recipientEmail;
+            case NotificationInterface::CHANNEL_SMS:
+                return $this->recipient;
         }
-
-        $redis = \Queue::getRedis();
-        // WARNING: RedisQueue::getQueue is protected so for now I'm hardcoding the queue name. If the underlying implementation
-        // change this should be caught by unit tests
-        $queueName = 'queues:default:delayed';
-        $redis->zrem($queueName, $this->jobId);
-
-        $this->delete();
     }
 }

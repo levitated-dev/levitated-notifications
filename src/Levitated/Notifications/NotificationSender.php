@@ -9,6 +9,7 @@ abstract class NotificationSender
     const STATE_SENT = 'sent';
     const STATE_FAILED = 'error';
     const STATE_DROPPED = 'dropped';
+    const STATE_DELETED = 'deleted';
 
     /**
      * @param \Illuminate\Queue\Jobs\Job $job

@@ -1,6 +1,6 @@
 # Levitated Notifications for Laravel 4
 
-This packages is deprecated.  
+**This packages is deprecated.**  
 
 Email and SMS sending package, provides an easy interface for sending email/sms notifications using an job queue. 
 
